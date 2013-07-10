@@ -37,7 +37,7 @@
 	
 	function edgeDetect(imgData){
 		var imgDataCopy = copyImageData(ctx, imgData);
-		var THRESHOLD = 30;
+		var THRESHOLD = 10;
 		for(var y = 0; y < imgData.height; y++){
 			for(var x = 0; x < imgData.width; x++){
 				var i = x * 4 + y * imgData.width * 4;
@@ -95,7 +95,11 @@
 					(!w && !nw && !n) ||
 					(!n && !ne && !e) ||
 					(!e && !se && !s) ||
-					(!w && !sw && !s)) &&
+					(!w && !sw && !s) ||
+					(!n && !w) ||
+					(!n && !e) ||
+					(!s && !w) ||
+					(!s && !e)) &&
 					(!o)){
 					setPixel(i, 255, imgDataCopy);
 				}
