@@ -14,7 +14,7 @@
 
 	//add image to page so it can be accessed
 	var img = document.createElement('img');
-	img.src = 'shapes.jpg';
+	img.src = 'groovy.jpg';
 	img.style.display = 'none';
 	document.body.appendChild(img);
 	
@@ -27,17 +27,18 @@
 		imgData = ctx.getImageData(0, 0, W, H);
 		if(clicks === 0){
 			var newImgData = edgeDetect(imgData);
-			ctx.putImageData(newImgData, 0, 0);
 		}else if(clicks === 1){
-			var newerImgData = edgeThin(imgData);
-			ctx.putImageData(newerImgData, 0, 0);
+			var newImgData = edgeThin(imgData);
+		}else if(clicks === 2){
+			var newImgData = removeSmallEdges(imgData);
 		}
+		ctx.putImageData(newImgData, 0, 0);
 		clicks++;
 	});
 	
 	function edgeDetect(imgData){
 		var imgDataCopy = copyImageData(ctx, imgData);
-		var THRESHOLD = 10;
+		var THRESHOLD = 20;
 		for(var y = 0; y < imgData.height; y++){
 			for(var x = 0; x < imgData.width; x++){
 				var i = x * 4 + y * imgData.width * 4;
@@ -105,7 +106,77 @@
 				}
 			}
 		}
+		var imgDataCopy = removeFalseEdges(imgDataCopy);
 		return imgDataCopy;
+	}
+	
+	function removeFalseEdges(imgData){
+		var imgDataCopy = copyImageData(ctx, imgData);
+		for(var y = 0; y < imgData.height; y++){
+			for(var x = 0; x < imgData.width; x++){
+				var i = x * 4 + y * imgData.width * 4;
+				var o = imgDataCopy.data[i];
+				var n = imgDataCopy.data[i - imgData.width * 4];
+				var nw = imgDataCopy.data[i - imgData.width * 4 - 4];
+				var ne = imgDataCopy.data[i - imgData.width * 4 + 4];
+				var w = imgDataCopy.data[i - 4];
+				var e = imgDataCopy.data[i + 4];
+				var s = imgDataCopy.data[i + imgData.width * 4];
+				var sw = imgDataCopy.data[i + imgData.width * 4 - 4];
+				var se = imgDataCopy.data[i + imgData.width * 4 + 4];
+				if((!!o && !!n && !!nw && !!ne && !!w && !!e && !!sw && !!s && !!se)//remove black pixels that are alone
+					 ){
+					setPixel(i, 255, imgDataCopy);
+				}
+			}
+		}
+		return imgDataCopy;
+	}
+
+	function removeSmallEdges(imgData){
+		var imgDataCopy = copyImageData(ctx, imgData);
+		for(var y = 0; y < imgData.height; y++){
+			for(var x = 0; x < imgData.width; x++){
+				var i = x * 4 + y * imgData.width * 4;
+				var o = imgDataCopy.data[i];
+				if(o === 0){
+					var group = traverse(i, imgData, []);
+					if(group.length < 10){
+						for(var j = 0; j < group.length; j++){
+							setPixel(group[j], 255, imgDataCopy);
+						}
+					}
+				}
+			}
+		}
+		return imgDataCopy;
+	}
+
+	function traverse(i, imgData, traversed){//traverses the current pixel until a length has been reached
+		var group = [i]; //initialize the group from the current pixel's perspective
+		var neighbors = getNeighborEdges(i, imgData, traversed);//i want to pass the traversed group to the getNeighborEdges so that it will not include those anymore
+		for(var i = 0; i < neighbors.length; i++){
+			group = group.concat(traverse(neighbors[i], imgData, traversed.concat(group)));//recursively get the other edges connected
+		}
+		return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
+	}
+
+	function getNeighborEdges(i, imgData, includedEdges){
+		var neighbors = [];
+		var directions = [
+			i + 4, //e
+			i - imgData.width * 4 + 4, //ne
+			i - imgData.width * 4, //n
+			i - imgData.width * 4 - 4, //nw
+			i - 4, //w
+			i + imgData.width * 4 - 4, //sw
+			i + imgData.width * 4, //s
+			i + imgData.width * 4 + 4 //se
+		];
+		for(var j = 0; j < directions.length; j++)
+			if(imgData.data[directions[j]] === 0 && includedEdges.indexOf(directions[j]) === -1)
+				neighbors.push(directions[j]);	
+		return neighbors;
 	}
 
 	function copyImageData(ctx, src){
@@ -121,9 +192,8 @@
 	}
 
 	function getPixel(i, imgData){
-	  if (i > imgData.data.length){
+	  if (i > imgData.data.length)
 			return false;
-		}
 		return (imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2])/3;
 	}
 	exports.getPixel = getPixel;
