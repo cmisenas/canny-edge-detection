@@ -22,6 +22,8 @@
 	//load image data
 	ctx.drawImage(img, 0, 0);
 	
+	//temporary variable to know which function to perform
+	//TODO: perhaps create ui for each?
 	var clicks = 0;
 	window.addEventListener('click', function(){
 		imgData = ctx.getImageData(0, 0, W, H);
@@ -37,17 +39,18 @@
 	});
 	
 	function edgeDetect(imgData){
+		//only work on a copy of the image data
 		var imgDataCopy = copyImageData(ctx, imgData);
 		var THRESHOLD = 20;
 		for(var y = 0; y < imgData.height; y++){
 			for(var x = 0; x < imgData.width; x++){
 				var i = x * 4 + y * imgData.width * 4;
 				var pix1 = getPixel(i, imgData);
-				var pix2 = getPixel(i + imgData.width * 4, imgData) || pix1;
-				var pix3 = getPixel(i + 4, imgData) || pix1;
-				if(Math.abs(pix1 - pix2) < THRESHOLD && Math.abs(pix1 - pix3) < THRESHOLD){
+				var pix2 = getPixel(i + imgData.width * 4, imgData) || pix1; //get the pixel directly below it or set it to the same pixel for cases like bottom edges
+				var pix3 = getPixel(i + 4, imgData) || pix1; //get the pixel next to it or set it to the same pixel for cases like the right edges
+				if(Math.abs(pix1 - pix2) < THRESHOLD && Math.abs(pix1 - pix3) < THRESHOLD){//edge NOT detected
 					setPixel(i, 255, imgDataCopy);
-				}else{
+				}else{//edge detected
 					setPixel(i, 0, imgDataCopy);
 				}
 			}
@@ -116,6 +119,7 @@
 			for(var x = 0; x < imgData.width; x++){
 				var i = x * 4 + y * imgData.width * 4;
 				var o = imgDataCopy.data[i];
+				//get it's neighboring pixels in n, s, e, w, ne, nw, se & sw
 				var n = imgDataCopy.data[i - imgData.width * 4];
 				var nw = imgDataCopy.data[i - imgData.width * 4 - 4];
 				var ne = imgDataCopy.data[i - imgData.width * 4 + 4];
@@ -139,9 +143,9 @@
 			for(var x = 0; x < imgData.width; x++){
 				var i = x * 4 + y * imgData.width * 4;
 				var o = imgDataCopy.data[i];
-				if(o === 0){
+				if(o === 0){//only care if the current pixel is an edge/black
 					var group = traverse(i, imgData, []);
-					if(group.length < 10){
+					if(group.length < 10){//only delete the group if it is less than 10 in size
 						for(var j = 0; j < group.length; j++){
 							setPixel(group[j], 255, imgDataCopy);
 						}
@@ -196,5 +200,4 @@
 			return false;
 		return (imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2])/3;
 	}
-	exports.getPixel = getPixel;
 }(this));
