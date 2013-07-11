@@ -3,12 +3,9 @@
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext('2d');
 	var imgData;
-	//set canvas width and height
-	var W = 600;
-	var H = 400;
 	//sytle canvas
-	canvas.width = W;
-	canvas.height = H;
+	canvas.width = 600;
+	canvas.height = 400;
 	canvas.style.display = 'block';
 	canvas.style.margin = '50px auto';
 
@@ -26,7 +23,7 @@
 	//TODO: perhaps create ui for each?
 	var clicks = 0;
 	window.addEventListener('click', function(){
-		imgData = ctx.getImageData(0, 0, W, H);
+		imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		if(clicks === 0){
 			var newImgData = edgeDetect(imgData);
 		}else if(clicks === 1){
