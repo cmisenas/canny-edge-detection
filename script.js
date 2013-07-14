@@ -19,21 +19,22 @@
 	//load image data
 	ctx.drawImage(img, 0, 0);
 	
-	//temporary variable to know which function to perform
-	//TODO: perhaps create ui for each?
-	var clicks = 0;
-	window.addEventListener('click', function(){
+	img.onload = function() {
 		imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		if(clicks === 0){
-			var newImgData = edgeDetect(imgData);
-		}else if(clicks === 1){
-			var newImgData = edgeThin(imgData);
-		}else if(clicks === 2){
-			var newImgData = removeSmallEdges(imgData);
-		}
-		ctx.putImageData(newImgData, 0, 0);
-		clicks++;
-	});
+	}
+
+	var blurBtn = document.getElementById('blur');
+	var resetBtn = document.getElementById('reset');
+
+	blurBtn.onclick = function() {//for applying Gaussian filter
+		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		var size = document.getElementById('size').value;
+		size = parseInt(size) || 3;//default to 3 if size is empty
+	}
+
+	resetBtn.onclick = function() {
+		ctx.putImageData(imgData, 0, 0);//put back the original image to the canvas
+	}
 	
 	function edgeDetect(imgData){
 		//only work on a copy of the image data
