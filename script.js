@@ -36,6 +36,26 @@
 		ctx.putImageData(imgData, 0, 0);//put back the original image to the canvas
 	}
 	
+	function generateKernel(sigma, size) {
+		var matrix = [];
+		var E = 2.718;//Euler's number rounded of to 3 places
+		for (var y = -(size - 1)/2, i = 0; i < size; y++, i++) {
+			matrix[i] = [];
+			for (var x = -(size - 1)/2, j = 0; j < size; x++, j++) {
+				//create matrix round to 3 decimal places
+				matrix[i][j] = 1/(2 * Math.PI * Math.pow(sigma, 2)) * Math.pow(E, -(Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2))/(2 * Math.pow(sigma, 2)));
+			}
+		}
+		//normalize the matrix to make its sum 1
+		var normalize = 1/sum(matrix);
+		for (var i = 0; i < matrix.length; i++) {
+			for (var j = 0; j < matrix[i].length; j++) {
+				matrix[i][j] = Math.round(normalize * matrix[i][j] * 1000)/1000;
+			}
+		}
+		return matrix;
+	}
+	
 	function edgeDetect(imgData){
 		//only work on a copy of the image data
 		var imgDataCopy = copyImageData(ctx, imgData);
