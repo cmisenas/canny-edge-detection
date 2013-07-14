@@ -162,6 +162,44 @@
 		}
 		return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
 	}
+	
+
+	//helper functions
+	function runImg(height, width, size, fn) {
+		for (y = 0; y < height; y++) {
+			for (x = 0; x < width; x++) {
+				var i = x * 4 + y * width * 4;
+				var matrix = getMatrix(x, y, size, width, height);
+				fn(i, matrix);
+			}
+		}
+	}
+
+	/*
+	 * args: center x, center y, size of matrix, width of larger matrix, height of larger matrix
+	 */
+	function getMatrix(cx, cy, size, width, height) {//will generate a 2d array of sizexsize
+		var matrix = [];
+		for (var i = 0, y = -(size-1)/2; i < size; i++, y++) {
+			matrix[i] = [];
+			for (var j = 0, x = -(size-1)/2; j < size; j++, x++) {
+				matrix[i][j] = (cx + x) * 4 + (cy + y) * width * 4;
+			}
+		}
+		return matrix;
+	}
+	
+	function sum(arr) {//receives an array and returns sum
+		var result = 0;
+		for (var i = 0; i < arr.length; i++) {
+			if (/^\s*function Array/.test(String(arr[i].constructor))) {
+				result += sum(arr[i]);
+			} else {
+				result += arr[i];
+			}
+		}
+		return result;
+	}
 
 	function getNeighborEdges(i, imgData, includedEdges){
 		var neighbors = [];
