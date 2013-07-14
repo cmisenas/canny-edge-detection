@@ -36,6 +36,34 @@
 		ctx.putImageData(imgData, 0, 0);//put back the original image to the canvas
 	}
 	
+	function gaussianBlur(imgData, sigma, size) {
+		var imgDataCopy = copyImageData(ctx, imgData);
+		var kernel = generateKernel(sigma, size);
+		runImg(imgData.height, imgData.width, size, function(current, neighbors){
+			//iterate through each of the neighbors plus the current pixel to apply some function, in this case, multiply to the kernel and add
+			var resultR = 0;
+			var resultG = 0;
+			var resultB = 0;
+			for (var i = 0; i < size; i++) {
+				for (var j = 0; j < size; j++) {
+					if (neighbors[i][j] < 0 || neighbors[i][j] > imgData.data.length || neighbors[i][j] % imgData.width * 4 === 0 || neighbors[i][j] % imgData.width * 4 === imgData.width * 4 - 4) { //check if it is less than 0, more than the total length, beyong the left or right edges, then set to the center pixel
+						resultR += imgDataCopy.data[current] * kernel[i][j];//just return the center pixel's value multiplied by the kernel matrix
+						resultG += imgDataCopy.data[current + 1] * kernel[i][j];
+						resultB += imgDataCopy.data[current + 2] * kernel[i][j];
+					} else {
+						resultR += imgDataCopy.data[neighbors[i][j]] * kernel[i][j];//return the existing pixel value multiplied by the kernel matrix
+						resultG += imgDataCopy.data[neighbors[i][j] + 1] * kernel[i][j];
+						resultB += imgDataCopy.data[neighbors[i][j] + 2] * kernel[i][j];
+					}
+				}
+			}
+			imgDataCopy.data[current] = resultR;
+			imgDataCopy.data[current + 1] = resultG;
+			imgDataCopy.data[current + 2] = resultB;
+		});
+		return imgDataCopy;
+	}
+
 	function generateKernel(sigma, size) {
 		var matrix = [];
 		var E = 2.718;//Euler's number rounded of to 3 places
