@@ -30,6 +30,8 @@
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		var size = document.getElementById('size').value;
 		size = parseInt(size) || 3;//default to 3 if size is empty
+		var newImgData = gaussianBlur(currImgData, 1.5, 3);
+		ctx.putImageData(newImgData, 0, 0);
 	}
 
 	resetBtn.onclick = function() {
