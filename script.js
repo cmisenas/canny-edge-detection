@@ -26,6 +26,7 @@
 	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
 	var edgeBtn = document.getElementById('edge');
+	var invertBtn = document.getElementById('invert');
 	var resetBtn = document.getElementById('reset');
 
 	grayBtn.onclick = function() {
@@ -44,6 +45,12 @@
 	
 	edgeBtn.onclick = function() {
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	}
+	
+	invertBtn.onclick = function() {
+		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		var newImgData = invertColors(currImgData);
+		ctx.putImageData(newImgData, 0, 0);
 	}
 
 	resetBtn.onclick = function() {
@@ -107,6 +114,16 @@
 			}
 		}
 		return matrix;
+	}
+	
+	function invertColors(imgData) {
+		var imgDataCopy = copyImageData(ctx, imgData);
+		runImg(imgData.height, imgData.width, null, function(current) {
+			imgDataCopy.data[current] = 255 - imgDataCopy.data[current];
+			imgDataCopy.data[current + 1] = 255 - imgDataCopy.data[current + 1];
+			imgDataCopy.data[current + 2] = 255 - imgDataCopy.data[current + 2];
+		});
+		return imgDataCopy;
 	}
 	
 	//helper functions
