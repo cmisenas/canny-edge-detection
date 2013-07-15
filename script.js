@@ -45,6 +45,8 @@
 	
 	edgeBtn.onclick = function() {
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		var newImgData = sobel(currImgData);
+		ctx.putImageData(newImgData, 0, 0);
 	}
 	
 	invertBtn.onclick = function() {
@@ -89,6 +91,40 @@
 			imgDataCopy.data[current + 1] = resultG;
 			imgDataCopy.data[current + 2] = resultB;
 		});
+		return imgDataCopy;
+	}
+	
+	function sobel(imgData) {//find intensity gradient of image
+		var imgDataCopy = copyImageData(ctx, imgData);
+		//perform vertical convolution
+		var xfilter = [[-1, 0, 1],
+									 [-2, 0, 2],
+									 [-1, 0, 1]];
+		//perform horizontal convolution
+		var yfilter = [[1, 2, 1],
+									 [0, 0, 0],
+									 [-1, -2, -1]];
+
+		runImg(imgData.height, imgData.width, 3, function(current, neighbors) {
+			var edgeX = 0;
+			var edgeY = 0;
+			if (checkCornerOrBorder(current, imgData.width, imgData.height) === false) { //check if it is less than 0, more than the total length, beyong the left or right edges, then set to the center pixel
+				for (var i = 0; i < 3; i++) {
+					for (var j = 0; j < 3; j++) {
+						edgeX += imgData.data[neighbors[i][j]] * xfilter[i][j];
+						edgeY += imgData.data[neighbors[i][j]] * yfilter[i][j];
+					}
+				}
+			}
+
+			var grad = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
+			imgDataCopy.data[current] = grad;
+			imgDataCopy.data[current + 1] = grad;
+			imgDataCopy.data[current + 2] = grad;
+		});
+
+		//perform diagonal1 convolution
+		//perform diagonal2 convolution
 		return imgDataCopy;
 	}
 
