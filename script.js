@@ -120,7 +120,7 @@
 			}
 			
 			edgeX = edgeX === 0? edgeX + 0.001: edgeX;
-			var dir = roundDir(Math.round(Math.atan(edgeY/edgeX) * (180/Math.PI)));
+			var dir = roundDir(Math.atan(edgeY/edgeX) * (180/Math.PI));
 			dirMap[current] = dir;
 
 			var grad = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
