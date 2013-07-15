@@ -151,6 +151,10 @@
 		return matrix;
 	}
 	
+	function checkCornerOrBorder(i, width, height) {//returns true if a pixel lies on the border of an image
+		return i - (width * 4) < 0 || i % (width * 4) === 0 || i % (width * 4) === (width * 4) - 4  || i + (width * 4) > width * height * 4;
+	}
+	
 	function sum(arr) {//receives an array and returns sum
 		var result = 0;
 		for (var i = 0; i < arr.length; i++) {
