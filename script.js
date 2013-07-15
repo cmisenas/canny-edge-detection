@@ -25,6 +25,7 @@
 
 	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
+	var edgeBtn = document.getElementById('edge');
 	var resetBtn = document.getElementById('reset');
 
 	grayBtn.onclick = function() {
@@ -38,6 +39,14 @@
 		var size = document.getElementById('size').value;
 		size = parseInt(size) || 3;//default to 3 if size is empty
 		var newImgData = gaussianBlur(currImgData, 1.5, 3);
+		ctx.putImageData(newImgData, 0, 0);
+	}
+	
+	edgeBtn.onclick = function() {
+		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		var newImgData = edgeDetect(currImgData);
+		var newImgData = edgeThin(newImgData);
+		var newImgData = removeFalseEdges(newImgData);
 		ctx.putImageData(newImgData, 0, 0);
 	}
 
