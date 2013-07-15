@@ -45,8 +45,9 @@
 	
 	edgeBtn.onclick = function() {
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		var newImgData = sobel(currImgData);
-		ctx.putImageData(newImgData, 0, 0);
+		var result = sobel(currImgData);
+		imgData.dirMap = result.dir; //store the direction somewhere for the meantime as code is currently performing Canny steps one by one
+		ctx.putImageData(result.img, 0, 0);
 	}
 	
 	invertBtn.onclick = function() {
@@ -96,6 +97,7 @@
 	
 	function sobel(imgData) {//find intensity gradient of image
 		var imgDataCopy = copyImageData(ctx, imgData);
+		var dirMap = [];
 		//perform vertical convolution
 		var xfilter = [[-1, 0, 1],
 									 [-2, 0, 2],
@@ -116,6 +118,10 @@
 					}
 				}
 			}
+			
+			edgeX = edgeX === 0? edgeX + 0.001: edgeX;
+			var dir = roundDir(Math.round(Math.atan(edgeY/edgeX) * (180/Math.PI)));
+			dirMap[current] = dir;
 
 			var grad = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
 			imgDataCopy.data[current] = grad;
@@ -125,7 +131,7 @@
 
 		//perform diagonal1 convolution
 		//perform diagonal2 convolution
-		return imgDataCopy;
+		return {img: imgDataCopy, dir: dirMap};
 	}
 
 	function generateKernel(sigma, size) {
@@ -185,6 +191,20 @@
 	
 	function checkCornerOrBorder(i, width, height) {//returns true if a pixel lies on the border of an image
 		return i - (width * 4) < 0 || i % (width * 4) === 0 || i % (width * 4) === (width * 4) - 4  || i + (width * 4) > width * height * 4;
+	}
+
+	function roundDir(deg) {
+		var roundVal = 0;
+		if ((deg >= 0 && deg <= 22.5) || (deg > 157.5 && deg <= 180)) {
+			roundVal = 0;
+		} else if (deg > 22.5 && deg <= 67.5) {
+			roundVal = 45;
+		} else if (deg > 67.5 && deg <= 112.5) {
+			roundVal = 90;
+		} else if (deg > 112.5 && deg <= 157.5) {
+			roundVal = 135;
+		}
+		return roundVal;
 	}
 	
 	function sum(arr) {//receives an array and returns sum
