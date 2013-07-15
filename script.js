@@ -46,8 +46,8 @@
 	edgeBtn.onclick = function() {
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		var result = sobel(currImgData);
-		imgData.dirMap = result.dir; //store the direction somewhere for the meantime as code is currently performing Canny steps one by one
-		ctx.putImageData(result.img, 0, 0);
+		var newImgData = nonMaximumSuppress(result);
+		ctx.putImageData(newImgData, 0, 0);
 	}
 	
 	invertBtn.onclick = function() {
@@ -131,7 +131,36 @@
 
 		//perform diagonal1 convolution
 		//perform diagonal2 convolution
-		return {img: imgDataCopy, dir: dirMap};
+		imgDataCopy.dirMap = dirMap;
+		return imgDataCopy;
+	}
+
+	function nonMaximumSuppress(imgData) {
+		var imgDataCopy = copyImageData(ctx, imgData);
+		runImg(imgData.height, imgData.width, 3, function(current, neighbors) {
+			var dir = imgData.dirMap[current];
+			//pixel neighbors to compare
+			if (dir === 0) {
+				var pix1 = imgData.data[neighbors[1][2]];
+				var pix2 = imgData.data[neighbors[1][0]];
+			} else if (dir === 45) {
+				var pix1 = imgData.data[neighbors[0][2]];
+				var pix2 = imgData.data[neighbors[2][0]];
+			} else if (dir === 90) {
+				var pix1 = imgData.data[neighbors[0][1]];
+				var pix2 = imgData.data[neighbors[2][1]];
+			} else {
+				var pix1 = imgData.data[neighbors[0][0]];
+				var pix2 = imgData.data[neighbors[2][2]];
+			}
+
+			if (pix1 > imgData.data[current] || pix2 > imgData.data[current]) {//suppress
+				imgDataCopy.data[current] = 0;
+				imgDataCopy.data[current + 1] = 0;
+				imgDataCopy.data[current + 2] = 0;
+			}
+		});
+		return imgDataCopy;
 	}
 
 	function generateKernel(sigma, size) {
