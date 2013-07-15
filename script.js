@@ -163,24 +163,6 @@
 		return result;
 	}
 
-	function getNeighborEdges(i, imgData, includedEdges){
-		var neighbors = [];
-		var directions = [
-			i + 4, //e
-			i - imgData.width * 4 + 4, //ne
-			i - imgData.width * 4, //n
-			i - imgData.width * 4 - 4, //nw
-			i - 4, //w
-			i + imgData.width * 4 - 4, //sw
-			i + imgData.width * 4, //s
-			i + imgData.width * 4 + 4 //se
-		];
-		for(var j = 0; j < directions.length; j++)
-			if(imgData.data[directions[j]] === 0 && includedEdges.indexOf(directions[j]) === -1)
-				neighbors.push(directions[j]);	
-		return neighbors;
-	}
-
 	function copyImageData(ctx, src){
 			var dst = ctx.createImageData(src.width, src.height);
 			dst.data.set(src.data);
