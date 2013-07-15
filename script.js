@@ -23,8 +23,15 @@
 		imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	}
 
+	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
 	var resetBtn = document.getElementById('reset');
+
+	grayBtn.onclick = function() {
+		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		var newImgData = grayscale(currImgData);
+		ctx.putImageData(newImgData, 0, 0);
+	}
 
 	blurBtn.onclick = function() {//for applying Gaussian filter
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -36,6 +43,17 @@
 
 	resetBtn.onclick = function() {
 		ctx.putImageData(imgData, 0, 0);//put back the original image to the canvas
+	}
+
+	function grayscale(imgData) {
+		var imgDataCopy = copyImageData(ctx, imgData);
+		runImg(imgData.height, imgData.width, size, function(current) { 
+			var grayLevel = (0.3 * imgDataCopy.data[current]) + (0.59 * imgDataCopy.data[current + 1]) + (0.11 * imgDataCopy.data[current + 2]);
+			imgDataCopy.data[current]=grayLevel;
+			imgDataCopy.data[current + 1]=grayLevel;
+			imgDataCopy.data[current + 2]=grayLevel;
+		});
+		return imgDataCopy;
 	}
 	
 	function gaussianBlur(imgData, sigma, size) {
