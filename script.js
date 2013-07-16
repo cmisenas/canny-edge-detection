@@ -229,7 +229,8 @@
 	}
 
 	function roundDir(deg) {
-		var roundVal = 0;
+		deg = deg < 0 ? deg + 180 : deg;
+		var roundVal;
 		if ((deg >= 0 && deg <= 22.5) || (deg > 157.5 && deg <= 180)) {
 			roundVal = 0;
 		} else if (deg > 22.5 && deg <= 67.5) {
