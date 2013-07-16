@@ -78,9 +78,7 @@
 		var imgDataCopy = copyImageData(ctx, imgData);
 		runImg(imgData.height, imgData.width, size, function(current) { 
 			var grayLevel = (0.3 * imgDataCopy.data[current]) + (0.59 * imgDataCopy.data[current + 1]) + (0.11 * imgDataCopy.data[current + 2]);
-			imgDataCopy.data[current]=grayLevel;
-			imgDataCopy.data[current + 1]=grayLevel;
-			imgDataCopy.data[current + 2]=grayLevel;
+			setPixel(current, grayLevel, imgDataCopy);
 		});
 		return imgDataCopy;
 	}
@@ -137,9 +135,7 @@
 			dirMap[current] = dir;
 
 			var grad = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
-			imgDataCopy.data[current] = grad;
-			imgDataCopy.data[current + 1] = grad;
-			imgDataCopy.data[current + 2] = grad;
+			setPixel(current, grad, imgDataCopy);
 		});
 
 		//perform diagonal1 convolution
@@ -168,9 +164,7 @@
 			}
 
 			if (pix1 > imgData.data[current] || pix2 > imgData.data[current]) {//suppress
-				imgDataCopy.data[current] = 0;
-				imgDataCopy.data[current + 1] = 0;
-				imgDataCopy.data[current + 2] = 0;
+				setPixel(current, 0, imgDataCopy);
 			}
 		});
 		return imgDataCopy;
@@ -204,15 +198,12 @@
 			//now change to pixels to correct color
 			for (var j in notEdges) {
 				j = parseInt(j);
-				imgDataCopy.data[j] = 0;
-				imgDataCopy.data[j + 1] = 0;
-				imgDataCopy.data[j + 2] = 0;
+				setPixel(j, 0, imgDataCopy);
 			}
+
 			for (var k in realEdges) {
 				k = parseInt(k);
-				imgDataCopy.data[k] = 255;
-				imgDataCopy.data[k + 1] = 255;
-				imgDataCopy.data[k + 2] = 255;
+				setPixel(k, 255, imgDataCopy);
 			}
 
 			return imgDataCopy;
