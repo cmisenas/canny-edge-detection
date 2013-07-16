@@ -318,7 +318,7 @@
 		var group = [current]; //initialize the group from the current pixel's perspective
 		var neighbors = getNeighborEdges(current, imgData, threshold, traversed);//i want to pass the traversed group to the getNeighborEdges so that it will not include those anymore
 		for(var i = 0; i < neighbors.length; i++){
-			group = group.concat(traverseEdge(neighbors[i], imgData, traversed.concat(group)));//recursively get the other edges connected
+			group = group.concat(traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));//recursively get the other edges connected
 		}
 		return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
 	}
