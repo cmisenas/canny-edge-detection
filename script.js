@@ -26,6 +26,7 @@
 	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
 	var edgeBtn = document.getElementById('edge');
+	var dirBtn = document.getElementById('dirmap');
 	var invertBtn = document.getElementById('invert');
 	var resetBtn = document.getElementById('reset');
 
@@ -42,14 +43,20 @@
 		var newImgData = gaussianBlur(currImgData, 1.5, 3);
 		ctx.putImageData(newImgData, 0, 0);
 	}
-	
+
 	edgeBtn.onclick = function() {
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		var result = sobel(currImgData);
 		var newImgData = nonMaximumSuppress(result);
 		ctx.putImageData(newImgData, 0, 0);
+		dirBtn.disabled = false;
+		var dirMap = showDirMap(result);
+			dirBtn.onclick = function() {
+				var newImgData = dirMap();
+				ctx.putImageData(newImgData, 0, 0);
+			}	
 	}
-	
+
 	invertBtn.onclick = function() {
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		var newImgData = invertColors(currImgData);
@@ -264,4 +271,36 @@
 			return false;
 		return (imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2])/3;
 	}
+
+	function showDirMap(imgData) {//just a quick function to help me look at the direction results
+		return function() {
+			var imgDataCopy = copyImageData(ctx, imgData);
+			var dirMap = imgData.dirMap;
+			runImg(imgData.height, imgData.width, null, function(i) { 
+				if (dirMap[i] === 0) {
+				 imgDataCopy.data[i] = 255
+				 imgDataCopy.data[i + 1] = 0
+				 imgDataCopy.data[i + 2] = 0
+				} else if (dirMap[i] === 45) {
+				 imgDataCopy.data[i] = 0
+				 imgDataCopy.data[i + 1] = 255
+				 imgDataCopy.data[i + 2] = 0
+				} else if (dirMap[i] === 90) {
+				 imgDataCopy.data[i] = 0
+				 imgDataCopy.data[i + 1] = 0
+				 imgDataCopy.data[i + 2] = 255
+				} else if (dirMap[i] === 135) {
+				 imgDataCopy.data[i] = 255
+				 imgDataCopy.data[i + 1] = 255
+				 imgDataCopy.data[i + 2] = 0
+				} else {
+				 imgDataCopy.data[i] = 255
+				 imgDataCopy.data[i + 1] = 0
+				 imgDataCopy.data[i + 2] = 255
+				}
+			});
+			return imgDataCopy;
+		}
+	}
+
 }(this));
