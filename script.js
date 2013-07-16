@@ -26,6 +26,7 @@
 	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
 	var edgeBtn = document.getElementById('edge');
+	var hysBtn = document.getElementById('hys');
 	var dirBtn = document.getElementById('dirmap');
 	var invertBtn = document.getElementById('invert');
 	var resetBtn = document.getElementById('reset');
@@ -50,11 +51,17 @@
 		var newImgData = nonMaximumSuppress(result);
 		ctx.putImageData(newImgData, 0, 0);
 		dirBtn.disabled = false;
+		hysBtn.disabled = false;
 		var dirMap = showDirMap(result);
-			dirBtn.onclick = function() {
-				var newImgData = dirMap();
-				ctx.putImageData(newImgData, 0, 0);
-			}	
+		var hysImgData = hysteresis(result);
+		hysBtn.onclick = function() {
+			var newImgData = hysImgData();
+			ctx.putImageData(newImgData, 0, 0);
+		}	
+		dirBtn.onclick = function() {
+			var newImgData = dirMap();
+			ctx.putImageData(newImgData, 0, 0);
+		}	
 	}
 
 	invertBtn.onclick = function() {
@@ -169,6 +176,49 @@
 		return imgDataCopy;
 	}
 
+	function hysteresis(imgData){ //mark strong and weak edges, discard others as false edges; only keep weak edges that are connected to strong edges
+		return function() {
+			var imgDataCopy = copyImageData(ctx, imgData);
+			var realEdges = []; //where real edges will be stored with the 1st pass
+			var notEdges = []; //to stroe non-edge pixels
+			var t1 = 200; //high threshold value
+			var t2 = 150; //low threshold value
+
+			//first pass
+			runImg(imgData.height, imgData.width, null, function(current) {
+				if (imgData.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
+					var group = traverseEdge(current, imgData, t2, []);
+					for(var i = 0; i < group.length; i++){
+						realEdges[group[i]] = true;
+					}
+				}
+			});
+
+			//second pass
+			runImg(imgData.height, imgData.width, null, function(current) {
+				if (realEdges[current] === undefined) {
+					notEdges[current] = true;
+				}
+			});
+			
+			//now change to pixels to correct color
+			for (var j in notEdges) {
+				j = parseInt(j);
+				imgDataCopy.data[j] = 0;
+				imgDataCopy.data[j + 1] = 0;
+				imgDataCopy.data[j + 2] = 0;
+			}
+			for (var k in realEdges) {
+				k = parseInt(k);
+				imgDataCopy.data[k] = 255;
+				imgDataCopy.data[k + 1] = 255;
+				imgDataCopy.data[k + 2] = 255;
+			}
+
+			return imgDataCopy;
+		}
+	}
+
 	function generateKernel(sigma, size) {
 		var matrix = [];
 		var E = 2.718;//Euler's number rounded of to 3 places
@@ -271,6 +321,34 @@
 	  if (i > imgData.data.length)
 			return false;
 		return (imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2])/3;
+	}
+	
+	function traverseEdge(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
+		var group = [current]; //initialize the group from the current pixel's perspective
+		var neighbors = getNeighborEdges(current, imgData, threshold, traversed);//i want to pass the traversed group to the getNeighborEdges so that it will not include those anymore
+		for(var i = 0; i < neighbors.length; i++){
+			group = group.concat(traverseEdge(neighbors[i], imgData, traversed.concat(group)));//recursively get the other edges connected
+		}
+		return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
+	}
+
+	function getNeighborEdges(i, imgData, threshold, includedEdges){
+		var neighbors = [];
+		var directions = [
+			i + 4, //e
+			i - imgData.width * 4 + 4, //ne
+			i - imgData.width * 4, //n
+			i - imgData.width * 4 - 4, //nw
+			i - 4, //w
+			i + imgData.width * 4 - 4, //sw
+			i + imgData.width * 4, //s
+			i + imgData.width * 4 + 4 //se
+		];
+		for(var j = 0; j < directions.length; j++)
+			if(imgData.data[directions[j]] > threshold && (includedEdges === undefined || includedEdges.indexOf(directions[j]) === -1))
+				neighbors.push(directions[j]);
+
+		return neighbors;
 	}
 
 	function showDirMap(imgData) {//just a quick function to help me look at the direction results
