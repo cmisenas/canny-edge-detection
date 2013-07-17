@@ -50,10 +50,12 @@
 		var result = sobel(currImgData);
 		var newImgData = nonMaximumSuppress(result);
 		ctx.putImageData(newImgData, 0, 0);
+		newImgData.dirMap = result.dirMap;
+		newImgData.gradMap = result.gradMap;
 		dirBtn.disabled = false;
 		hysBtn.disabled = false;
-		var dirMap = showDirMap(result);
-		var hysImgData = hysteresis(result);
+		var dirMap = showDirMap(newImgData);
+		var hysImgData = hysteresis(newImgData);
 		hysBtn.onclick = function() {
 			var newImgData = hysImgData();
 			ctx.putImageData(newImgData, 0, 0);
@@ -178,8 +180,8 @@
 		return function() {
 			var imgDataCopy = copyImageData(ctx, imgData);
 			var realEdges = []; //where real edges will be stored with the 1st pass
-			var t1 = 200; //high threshold value
-			var t2 = 150; //low threshold value
+			var t1 = 150; //high threshold value
+			var t2 = 100; //low threshold value
 
 			//first pass
 			runImg(imgData.height, imgData.width, null, function(current) {
