@@ -174,7 +174,6 @@
 		return function() {
 			var imgDataCopy = copyImageData(ctx, imgData);
 			var realEdges = []; //where real edges will be stored with the 1st pass
-			var notEdges = []; //to stroe non-edge pixels
 			var t1 = 200; //high threshold value
 			var t2 = 150; //low threshold value
 
@@ -191,20 +190,11 @@
 			//second pass
 			runImg(imgData.height, imgData.width, null, function(current) {
 				if (realEdges[current] === undefined) {
-					notEdges[current] = true;
+					setPixel(current, 0, imgDataCopy);
+				} else {
+					setPixel(current, 255, imgDataCopy);
 				}
 			});
-			
-			//now change to pixels to correct color
-			for (var j in notEdges) {
-				j = parseInt(j);
-				setPixel(j, 0, imgDataCopy);
-			}
-
-			for (var k in realEdges) {
-				k = parseInt(k);
-				setPixel(k, 255, imgDataCopy);
-			}
 
 			return imgDataCopy;
 		}
