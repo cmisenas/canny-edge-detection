@@ -298,12 +298,6 @@
 		imgData.data[i + 2] = val;
 	}
 
-	function getPixel(i, imgData){
-	  if (i > imgData.data.length)
-			return false;
-		return (imgData.data[i] + imgData.data[i + 1] + imgData.data[i + 2])/3;
-	}
-	
 	function traverseEdge(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
 		var group = [current]; //initialize the group from the current pixel's perspective
 		var neighbors = getNeighborEdges(current, imgData, threshold, traversed);//i want to pass the traversed group to the getNeighborEdges so that it will not include those anymore
