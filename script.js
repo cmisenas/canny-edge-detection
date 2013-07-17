@@ -163,6 +163,8 @@
 
 			if (pix1 > imgData.gradMap[current] || pix2 > imgData.gradMap[current]) {//suppress
 				setPixel(current, 0, imgDataCopy);
+			} else if (pix2 === imgData.gradMap[current] && pix1 < imgData.gradMap[current]) {
+				setPixel(current, 0, imgDataCopy);
 			}
 		});
 		return imgDataCopy;
