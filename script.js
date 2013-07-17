@@ -110,6 +110,7 @@
 	function sobel(imgData) {//find intensity gradient of image
 		var imgDataCopy = copyImageData(ctx, imgData);
 		var dirMap = [];
+		var gradMap = [];
 		//perform vertical convolution
 		var xfilter = [[-1, 0, 1],
 									 [-2, 0, 2],
@@ -135,12 +136,15 @@
 			dirMap[current] = dir;
 
 			var grad = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
+			gradMap[current] = grad;
+			
 			setPixel(current, grad, imgDataCopy);
 		});
 
 		//perform diagonal1 convolution
 		//perform diagonal2 convolution
 		imgDataCopy.dirMap = dirMap;
+		imgDataCopy.gradMap = gradMap;
 		return imgDataCopy;
 	}
 
@@ -150,20 +154,20 @@
 			var dir = imgData.dirMap[current];
 			//pixel neighbors to compare
 			if (dir === 0) {
-				var pix1 = imgData.data[neighbors[1][2]];
-				var pix2 = imgData.data[neighbors[1][0]];
+				var pix1 = imgData.gradMap[neighbors[1][2]];
+				var pix2 = imgData.gradMap[neighbors[1][0]];
 			} else if (dir === 45) {
-				var pix1 = imgData.data[neighbors[0][2]];
-				var pix2 = imgData.data[neighbors[2][0]];
+				var pix1 = imgData.gradMap[neighbors[0][2]];
+				var pix2 = imgData.gradMap[neighbors[2][0]];
 			} else if (dir === 90) {
-				var pix1 = imgData.data[neighbors[0][1]];
-				var pix2 = imgData.data[neighbors[2][1]];
+				var pix1 = imgData.gradMap[neighbors[0][1]];
+				var pix2 = imgData.gradMap[neighbors[2][1]];
 			} else {
-				var pix1 = imgData.data[neighbors[0][0]];
-				var pix2 = imgData.data[neighbors[2][2]];
+				var pix1 = imgData.gradMap[neighbors[0][0]];
+				var pix2 = imgData.gradMap[neighbors[2][2]];
 			}
 
-			if (pix1 > imgData.data[current] || pix2 > imgData.data[current]) {//suppress
+			if (pix1 > imgData.gradMap[current] || pix2 > imgData.gradMap[current]) {//suppress
 				setPixel(current, 0, imgDataCopy);
 			}
 		});
