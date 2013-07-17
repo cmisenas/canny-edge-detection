@@ -227,7 +227,7 @@
 	}
 	
 	//helper functions
-	function runImg(height, width, size, fn) {
+	function runImg(height, width, size, fn) {//general function used to iterate through an image an optionally return its 8 neighboring pixels
 		for (y = 0; y < height; y++) {
 			for (x = 0; x < width; x++) {
 				var i = x * 4 + y * width * 4;
@@ -237,10 +237,7 @@
 		}
 	}
 
-	/*
-	 * args: center x, center y, size of matrix, width of larger matrix, height of larger matrix
-	 */
-	function getMatrix(cx, cy, size, width, height) {//will generate a 2d array of sizexsize
+	function getMatrix(cx, cy, size, width, height) {//will generate a 2d array of sizexsize given center x, center y, size, image width & height
 		var matrix = [];
 		for (var i = 0, y = -(size-1)/2; i < size; i++, y++) {
 			matrix[i] = [];
@@ -255,7 +252,7 @@
 		return i - (width * 4) < 0 || i % (width * 4) === 0 || i % (width * 4) === (width * 4) - 4  || i + (width * 4) > width * height * 4;
 	}
 
-	function roundDir(deg) {
+	function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal, vertical, and 2 diagonals
 		deg = deg < 0 ? deg + 180 : deg;
 		var roundVal;
 		if ((deg >= 0 && deg <= 22.5) || (deg > 157.5 && deg <= 180)) {
@@ -296,7 +293,7 @@
 
 	function traverseEdge(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
 		var group = [current]; //initialize the group from the current pixel's perspective
-		var neighbors = getNeighborEdges(current, imgData, threshold, traversed);//i want to pass the traversed group to the getNeighborEdges so that it will not include those anymore
+		var neighbors = getNeighborEdges(current, imgData, threshold, traversed);//pass the traversed group to the getNeighborEdges so that it will not include those anymore
 		for(var i = 0; i < neighbors.length; i++){
 			group = group.concat(traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));//recursively get the other edges connected
 		}
@@ -322,7 +319,7 @@
 		return neighbors;
 	}
 
-	function showDirMap(imgData) {//just a quick function to help me look at the direction results
+	function showDirMap(imgData) {//just a quick function to look at the direction results
 		return function() {
 			var imgDataCopy = copyImageData(ctx, imgData);
 			var dirMap = imgData.dirMap;
