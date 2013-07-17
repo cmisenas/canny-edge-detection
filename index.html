@@ -1,9 +1,14 @@
 <html>
 	<head>
 		<title>Raster To Vector Conversion</title>
+		<style>
+			img {
+			display: none;
+			}
+		</style>
 	</head>
 	<body>
-		<canvas id="canvas"></canvas>
+		<canvas id="canvas" height="400px" width="600px" style="display: block; margin: 50px auto;"></canvas>
 		<div>
 			<button id="gray">Grayscale</button><br/>
 			<button id="blur">Gaussian Blur</button> <input type="text" id="size" size="1"/><br/>

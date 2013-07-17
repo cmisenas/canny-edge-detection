@@ -3,16 +3,10 @@
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext('2d');
 	var imgData;
-	//sytle canvas
-	canvas.width = 600;
-	canvas.height = 400;
-	canvas.style.display = 'block';
-	canvas.style.margin = '50px auto';
 
 	//add image to page so it can be accessed
 	var img = document.createElement('img');
 	img.src = 'groovy.jpg';
-	img.style.display = 'none';
 	document.body.appendChild(img);
 	
 
