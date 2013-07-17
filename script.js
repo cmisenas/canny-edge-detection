@@ -96,9 +96,7 @@
 					}
 				}
 			}
-			imgDataCopy.data[current] = resultR;
-			imgDataCopy.data[current + 1] = resultG;
-			imgDataCopy.data[current + 2] = resultB;
+			setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
 		});
 		return imgDataCopy;
 	}
@@ -223,9 +221,7 @@
 	function invertColors(imgData) {
 		var imgDataCopy = copyImageData(ctx, imgData);
 		runImg(imgData.height, imgData.width, null, function(current) {
-			imgDataCopy.data[current] = 255 - imgDataCopy.data[current];
-			imgDataCopy.data[current + 1] = 255 - imgDataCopy.data[current + 1];
-			imgDataCopy.data[current + 2] = 255 - imgDataCopy.data[current + 2];
+			setPixel(current, {r: 255 - imgDataCopy.data[current], g: 255 - imgDataCopy.data[current + 1], b: 255 - imgDataCopy.data[current + 2]}, imgDataCopy);
 		});
 		return imgDataCopy;
 	}
@@ -293,9 +289,9 @@
 	}
 
 	function setPixel(i, val, imgData){
-		imgData.data[i] = val;
-		imgData.data[i + 1] = val;
-		imgData.data[i + 2] = val;
+		imgData.data[i] = typeof val == 'number'? val: val.r;
+		imgData.data[i + 1] = typeof val == 'number'? val: val.g;
+		imgData.data[i + 2] = typeof val == 'number'? val: val.b;
 	}
 
 	function traverseEdge(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
@@ -332,25 +328,15 @@
 			var dirMap = imgData.dirMap;
 			runImg(imgData.height, imgData.width, null, function(i) { 
 				if (dirMap[i] === 0) {
-				 imgDataCopy.data[i] = 255
-				 imgDataCopy.data[i + 1] = 0
-				 imgDataCopy.data[i + 2] = 0
+					setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
 				} else if (dirMap[i] === 45) {
-				 imgDataCopy.data[i] = 0
-				 imgDataCopy.data[i + 1] = 255
-				 imgDataCopy.data[i + 2] = 0
+					setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
 				} else if (dirMap[i] === 90) {
-				 imgDataCopy.data[i] = 0
-				 imgDataCopy.data[i + 1] = 0
-				 imgDataCopy.data[i + 2] = 255
+					setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
 				} else if (dirMap[i] === 135) {
-				 imgDataCopy.data[i] = 255
-				 imgDataCopy.data[i + 1] = 255
-				 imgDataCopy.data[i + 2] = 0
+					setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
 				} else {
-				 imgDataCopy.data[i] = 255
-				 imgDataCopy.data[i + 1] = 0
-				 imgDataCopy.data[i + 2] = 255
+					setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
 				}
 			});
 			return imgDataCopy;
