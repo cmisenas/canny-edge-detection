@@ -84,10 +84,10 @@
 		var kernel = generateKernel(sigma, size);
 		runImg(imgData.height, imgData.width, size, function(current, neighbors) {
 			//iterate through each of the neighbors plus the current pixel to apply some function, in this case, multiply to the kernel and add
-			var resultR = 0;
-			var resultG = 0;
-			var resultB = 0;
-			if (checkCornerOrBorder(current, imgData.width, imgData.height) === false) { //check if it is less than 0, more than the total length, beyong the left or right edges, then set to the center pixel
+			if (checkCornerOrBorder(current, imgData.width, imgData.height) === false) {
+				var resultR = 0;
+				var resultG = 0;
+				var resultB = 0;
 				for (var i = 0; i < size; i++) {
 					for (var j = 0; j < size; j++) {
 						resultR += imgData.data[neighbors[i][j]] * kernel[i][j];//return the existing pixel value multiplied by the kernel matrix
@@ -95,12 +95,12 @@
 						resultB += imgData.data[neighbors[i][j] + 2] * kernel[i][j];
 					}
 				}
+				setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
 			}
-			setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
 		});
 		return imgDataCopy;
 	}
-	
+
 	function sobel(imgData) {//find intensity gradient of image
 		var imgDataCopy = copyImageData(ctx, imgData);
 		var dirMap = [];
