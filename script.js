@@ -34,7 +34,7 @@
 	blurBtn.onclick = function() {//for applying Gaussian filter
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		var size = Number(document.getElementById('size').value);
-		size = (size <= 1 || size > 21) ? 3 : (size % 2 === 1) ? size - 1 : size;
+		size = (size <= 1 || size > 21) ? 3 : (size % 2 === 0) ? size - 1 : size;
 		var sigma = Number(document.getElementById('sigma').value);
 		sigma = (sigma < 1 || sigma > 10) ? 1.5 : sigma;
 		var newImgData = gaussianBlur(currImgData, sigma, size);
@@ -86,19 +86,18 @@
 		var kernel = generateKernel(sigma, size);
 		runImg(imgData.height, imgData.width, size, function(current, neighbors) {
 			//iterate through each of the neighbors plus the current pixel to apply some function, in this case, multiply to the kernel and add
-			if (checkCornerOrBorder(current, imgData.width, imgData.height) === false) {
-				var resultR = 0;
-				var resultG = 0;
-				var resultB = 0;
-				for (var i = 0; i < size; i++) {
-					for (var j = 0; j < size; j++) {
-						resultR += imgData.data[neighbors[i][j]] * kernel[i][j];//return the existing pixel value multiplied by the kernel matrix
-						resultG += imgData.data[neighbors[i][j] + 1] * kernel[i][j];
-						resultB += imgData.data[neighbors[i][j] + 2] * kernel[i][j];
-					}
+			var resultR = 0;
+			var resultG = 0;
+			var resultB = 0;
+			for (var i = 0; i < size; i++) {
+				for (var j = 0; j < size; j++) {
+					var pixel = getPixel(neighbors[i][j], imgData);
+					resultR += pixel.r * kernel[i][j];//return the existing pixel value multiplied by the kernel matrix
+					resultG += pixel.g  * kernel[i][j];
+					resultB += pixel.b * kernel[i][j];
 				}
-				setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
 			}
+			setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
 		});
 		return imgDataCopy;
 	}
@@ -251,6 +250,7 @@
 		}
 		return matrix;
 	}
+	exports.getMatrix = getMatrix;
 	
 	function checkCornerOrBorder(i, width, height) {//returns true if a pixel lies on the border of an image
 		return i - (width * 4) < 0 || i % (width * 4) === 0 || i % (width * 4) === (width * 4) - 4  || i + (width * 4) > width * height * 4;
@@ -293,6 +293,14 @@
 		imgData.data[i] = typeof val == 'number'? val: val.r;
 		imgData.data[i + 1] = typeof val == 'number'? val: val.g;
 		imgData.data[i + 2] = typeof val == 'number'? val: val.b;
+	}
+
+	function getPixel(i, imgData) {
+		if (i < 0 || i > imgData.data.length - 4) {
+			return {r: 255, g: 255, b: 255, a: 255};
+		} else {
+			return {r: imgData.data[i], g: imgData.data[i + 1], b: imgData.data[i + 2], a: imgData.data[i + 3] };
+		}
 	}
 
 	function traverseEdge(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
