@@ -93,7 +93,7 @@
 				for (var j = 0; j < size; j++) {
 					var pixel = getPixel(neighbors[i][j], imgData);
 					resultR += pixel.r * kernel[i][j];//return the existing pixel value multiplied by the kernel matrix
-					resultG += pixel.g  * kernel[i][j];
+					resultG += pixel.g * kernel[i][j];
 					resultB += pixel.b * kernel[i][j];
 				}
 			}
@@ -135,9 +135,7 @@
 			
 			setPixel(current, grad, imgDataCopy);
 		});
-
-		//perform diagonal1 convolution
-		//perform diagonal2 convolution
+		
 		imgDataCopy.dirMap = dirMap;
 		imgDataCopy.gradMap = gradMap;
 		return imgDataCopy;
@@ -146,21 +144,11 @@
 	function nonMaximumSuppress(imgData) {
 		var imgDataCopy = copyImageData(ctx, imgData);
 		runImg(imgData.height, imgData.width, 3, function(current, neighbors) {
-			var dir = imgData.dirMap[current];
+			var pixNeighbors = getNeighbors(imgData.dirMap[current]);
+
 			//pixel neighbors to compare
-			if (dir === 0) {
-				var pix1 = imgData.gradMap[neighbors[1][2]];
-				var pix2 = imgData.gradMap[neighbors[1][0]];
-			} else if (dir === 45) {
-				var pix1 = imgData.gradMap[neighbors[0][2]];
-				var pix2 = imgData.gradMap[neighbors[2][0]];
-			} else if (dir === 90) {
-				var pix1 = imgData.gradMap[neighbors[0][1]];
-				var pix2 = imgData.gradMap[neighbors[2][1]];
-			} else {
-				var pix1 = imgData.gradMap[neighbors[0][0]];
-				var pix2 = imgData.gradMap[neighbors[2][2]];
-			}
+			var pix1 = imgData.gradMap[neighbors[pixNeighbors[0].x][pixNeighbors[0].y]];
+			var pix2 = imgData.gradMap[neighbors[pixNeighbors[1].x][pixNeighbors[1].y]];
 
 			if (pix1 > imgData.gradMap[current] || pix2 > imgData.gradMap[current]) {//suppress
 				setPixel(current, 0, imgDataCopy);
@@ -250,7 +238,6 @@
 		}
 		return matrix;
 	}
-	exports.getMatrix = getMatrix;
 	
 	function checkCornerOrBorder(i, width, height) {//returns true if a pixel lies on the border of an image
 		return i - (width * 4) < 0 || i % (width * 4) === 0 || i % (width * 4) === (width * 4) - 4  || i + (width * 4) > width * height * 4;
@@ -310,6 +297,11 @@
 			group = group.concat(traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));//recursively get the other edges connected
 		}
 		return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
+	}
+
+	function getNeighbors(dir) {
+		var degrees = {0 : [{x:1, y:2}, {x:1, y:0}], 45 : [{x: 0, y: 2}, {x: 2, y: 0}], 90 : [{x: 0, y: 1}, {x: 2, y: 1}], 135 : [{x: 0, y: 0}, {x: 2, y: 2}]};
+		return degrees[dir];
 	}
 
 	function getNeighborEdges(i, imgData, threshold, includedEdges){
