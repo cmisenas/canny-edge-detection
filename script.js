@@ -33,9 +33,11 @@
 
 	blurBtn.onclick = function() {//for applying Gaussian filter
 		var currImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		var size = document.getElementById('size').value;
-		size = parseInt(size) || 3;//default to 3 if size is empty
-		var newImgData = gaussianBlur(currImgData, 1.5, size);
+		var size = Number(document.getElementById('size').value);
+		size = (size <= 1 || size > 21) ? 3 : (size % 2 === 1) ? size - 1 : size;
+		var sigma = Number(document.getElementById('sigma').value);
+		sigma = (sigma < 1 || sigma > 10) ? 1.5 : sigma;
+		var newImgData = gaussianBlur(currImgData, sigma, size);
 		ctx.putImageData(newImgData, 0, 0);
 	}
 
