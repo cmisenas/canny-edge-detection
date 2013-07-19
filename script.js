@@ -22,6 +22,7 @@
 	var edgeBtn = document.getElementById('edge');
 	var hysBtn = document.getElementById('hys');
 	var dirBtn = document.getElementById('dirmap');
+	var gradBtn = document.getElementById('gradmap');
 	var invertBtn = document.getElementById('invert');
 	var resetBtn = document.getElementById('reset');
 
@@ -49,8 +50,10 @@
 		newImgData.dirMap = result.dirMap;
 		newImgData.gradMap = result.gradMap;
 		dirBtn.disabled = false;
+		gradBtn.disabled = false;
 		hysBtn.disabled = false;
 		var dirMap = showDirMap(newImgData);
+		var gradMap = showGradMap(newImgData);
 		var hysImgData = hysteresis(newImgData);
 		hysBtn.onclick = function() {
 			var newImgData = hysImgData();
@@ -58,6 +61,10 @@
 		}	
 		dirBtn.onclick = function() {
 			var newImgData = dirMap();
+			ctx.putImageData(newImgData, 0, 0);
+		}	
+		gradBtn.onclick = function() {
+			var newImgData = gradMap();
 			ctx.putImageData(newImgData, 0, 0);
 		}	
 	}
@@ -336,6 +343,29 @@
 					setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
 				} else if (dirMap[i] === 135) {
 					setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
+				} else {
+					setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
+				}
+			});
+			return imgDataCopy;
+		}
+	}
+
+	function showGradMap(imgData) {
+		return function() {
+			var imgDataCopy = copyImageData(ctx, imgData);
+			var gradMap = imgData.gradMap;
+			runImg(imgData.height, imgData.width, null, function(i) { 
+				if (gradMap[i] < 0) {
+					setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
+				} else if (gradMap[i] < 200) {
+					setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
+				} else if (gradMap[i] < 400) {
+					setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
+				} else if (gradMap[i] < 600) {
+					setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
+				} else if (gradMap[i] < 800) {
+					setPixel(i, {r: 0, g: 255, b: 255}, imgDataCopy);
 				} else {
 					setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
 				}
