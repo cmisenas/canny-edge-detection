@@ -1,0 +1,7 @@
+;(function(exports) {
+
+	function Vector() {
+
+	}
+
+}());
