@@ -10,7 +10,8 @@
 
 	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
-	var edgeBtn = document.getElementById('edge');
+	var sobelBtn = document.getElementById('sobel');
+	var nmsBtn = document.getElementById('nms');
 	var hysBtn = document.getElementById('hys');
 	var dirBtn = document.getElementById('dirmap');
 	var gradBtn = document.getElementById('gradmap');
@@ -33,33 +34,40 @@
 		canvas.ctx.putImageData(newImgData, 0, 0);
 	}
 
-	edgeBtn.onclick = function() {
+	sobelBtn.onclick = function() {
 		var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
 		var result = canny.sobel(currentImgData);
-		var newImgData = canny.nonMaximumSuppress(result);
-		canvas.ctx.putImageData(newImgData, 0, 0);
+		canvas.ctx.putImageData(result, 0, 0);
 
-		dirBtn.disabled = false;
-		gradBtn.disabled = false;
-		hysBtn.disabled = false;
+		nmsBtn.disabled = false;
 
-		newImgData.dirMap = result.dirMap;
-		newImgData.gradMap = result.gradMap;
-		var dirMap = canny.showDirMap(newImgData);
-		var gradMap = canny.showGradMap(newImgData);
-		var hysImgData = canny.hysteresis(newImgData);
-		hysBtn.onclick = function() {
-			var newImgData = hysImgData();
+		nmsBtn.onclick = function() {
+			var newImgData = canny.nonMaximumSuppress(result);
 			canvas.ctx.putImageData(newImgData, 0, 0);
-		}	
-		dirBtn.onclick = function() {
-			var newImgData = dirMap();
-			canvas.ctx.putImageData(newImgData, 0, 0);
-		}	
-		gradBtn.onclick = function() {
-			var newImgData = gradMap();
-			canvas.ctx.putImageData(newImgData, 0, 0);
-		}	
+			
+			dirBtn.disabled = false;
+			gradBtn.disabled = false;
+			hysBtn.disabled = false;
+			
+			newImgData.dirMap = result.dirMap;
+			newImgData.gradMap = result.gradMap;
+			var dirMap = canny.showDirMap(newImgData);
+			var gradMap = canny.showGradMap(newImgData);
+			var hysImgData = canny.hysteresis(newImgData);
+		
+			hysBtn.onclick = function() {
+				var newImgData = hysImgData();
+				canvas.ctx.putImageData(newImgData, 0, 0);
+			}	
+			dirBtn.onclick = function() {
+				var newImgData = dirMap();
+				canvas.ctx.putImageData(newImgData, 0, 0);
+			}	
+			gradBtn.onclick = function() {
+				var newImgData = gradMap();
+				canvas.ctx.putImageData(newImgData, 0, 0);
+			}	
+		}
 	}
 
 	invertBtn.onclick = function() {
