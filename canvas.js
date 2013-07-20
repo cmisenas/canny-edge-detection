@@ -9,7 +9,7 @@
 			this.elem.id = id;
 			this.elem.width = this.width;
 			this.elem.height = this.height;
-			document.body.appendChild(this.elem);
+			document.body.insertBefore(this.elem, document.body.firstChild);
 		}
 		this.ctx = this.elem.getContext('2d');
 		this.images = [];
