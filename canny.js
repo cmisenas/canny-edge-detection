@@ -15,6 +15,7 @@
 		
 		this.gaussianBlur = function(imgData, sigma, size) {
 			var imgDataCopy = canvas.copyImageData(imgData);
+			var that = this;
 			var kernel = generateKernel(sigma, size);
 			
 			canvas.runImg(size, function(current, neighbors) {
@@ -43,7 +44,7 @@
 					}
 				}
 				//normalize the matrix to make its sum 1
-				var normalize = 1/sum(matrix);
+				var normalize = 1/that.sum(matrix);
 				for (var i = 0; i < matrix.length; i++) {
 					for (var j = 0; j < matrix[i].length; j++) {
 						matrix[i][j] = Math.round(normalize * matrix[i][j] * 1000)/1000;
@@ -138,6 +139,7 @@
 		}
 
 		this.hysteresis = function(imgData){ //mark strong and weak edges, discard others as false edges; only keep weak edges that are connected to strong edges
+			var that = this;
 			return function() {
 				var imgDataCopy = canvas.copyImageData(imgData);
 				var realEdges = []; //where real edges will be stored with the 1st pass
@@ -147,7 +149,7 @@
 				//first pass
 				canvas.runImg(null, function(current) {
 					if (imgData.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
-						var group = traverseEdge(current, imgData, t2, []);
+						var group = that.traverseEdge(current, imgData, t2, []);
 						for(var i = 0; i < group.length; i++){
 							realEdges[group[i]] = true;
 						}
@@ -219,11 +221,11 @@
 		}
 		
 		//helper functions
-		function sum(arr) {//receives an array and returns sum
+		this.sum = function(arr) {//receives an array and returns sum
 			var result = 0;
 			for (var i = 0; i < arr.length; i++) {
 				if (/^\s*function Array/.test(String(arr[i].constructor))) {
-					result += sum(arr[i]);
+					result += this.sum(arr[i]);
 				} else {
 					result += arr[i];
 				}
@@ -231,17 +233,17 @@
 			return result;
 		}
 
-		function traverseEdge(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
+		this.traverseEdge = function(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
 			var group = [current]; //initialize the group from the current pixel's perspective
-			var neighbors = getNeighborEdges(current, imgData, threshold, traversed);//pass the traversed group to the getNeighborEdges so that it will not include those anymore
+			var neighbors = this.getNeighborEdges(current, imgData, threshold, traversed);//pass the traversed group to the getNeighborEdges so that it will not include those anymore
 			for(var i = 0; i < neighbors.length; i++){
-				group = group.concat(traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));//recursively get the other edges connected
+				group = group.concat(this.traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));//recursively get the other edges connected
 			}
 			return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
 		}
 
 
-		function getNeighborEdges(i, imgData, threshold, includedEdges){
+		this.getNeighborEdges = function(i, imgData, threshold, includedEdges){
 			var neighbors = [];
 			var directions = [
 				i + 4, //e
