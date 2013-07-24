@@ -233,7 +233,7 @@
 			return result;
 		}
 
-		this.traverseEdge = function(current, imgData, threshold, traversed){//traverses the current pixel until a length has been reached
+		this.traverseEdge = function(current, imgData, threshold, traversed) {//traverses the current pixel until a length has been reached
 			var group = [current]; //initialize the group from the current pixel's perspective
 			var neighbors = this.getNeighborEdges(current, imgData, threshold, traversed);//pass the traversed group to the getNeighborEdges so that it will not include those anymore
 			for(var i = 0; i < neighbors.length; i++){
@@ -243,7 +243,7 @@
 		}
 
 
-		this.getNeighborEdges = function(i, imgData, threshold, includedEdges){
+		this.getNeighborEdges = function(i, imgData, threshold, includedEdges) {
 			var neighbors = [];
 			var directions = [
 				i + 4, //e
@@ -256,12 +256,27 @@
 				i + imgData.width * 4 + 4 //se
 			];
 			for(var j = 0; j < directions.length; j++)
-				if(imgData.data[directions[j]] > threshold && (includedEdges === undefined || includedEdges.indexOf(directions[j]) === -1))
+				if(imgData.data[directions[j]] >= threshold && (includedEdges === undefined || includedEdges.indexOf(directions[j]) === -1))
 					neighbors.push(directions[j]);
 
 			return neighbors;
 		}
-	
+
+		this.getAllEdges = function(imgData) {
+			var that = this;
+			var traversed = [];
+			var edges = [];
+			canvas.runImg(null, function(current) {
+				if (imgData.data[current] === 255 && traversed[current] === undefined) {//assumes that an edge has white value
+				var group = that.traverseEdge(current, imgData, 255, []);
+					edges.push(group);
+					for(var i = 0; i < group.length; i++){
+						traversed[group[i]] = true;
+					}
+				}
+			});
+			return edges;
+		}
 	}
 
 	exports.Canny = Canny;
