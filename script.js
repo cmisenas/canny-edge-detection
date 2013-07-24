@@ -1,4 +1,4 @@
-;(function() {
+;(function(exports) {
 	var loadBtn = document.getElementById('load');
 	var canvas = new Canvas('canvas');
 	loadBtn.onclick = function() {
@@ -7,6 +7,10 @@
 	}
 
 	var canny = new Canny(canvas);
+	var vector;
+
+	exports.canvas = canvas;
+	exports.canny = canny;
 
 	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
@@ -58,6 +62,10 @@
 			hysBtn.onclick = function() {
 				var newImgData = hysImgData();
 				canvas.ctx.putImageData(newImgData, 0, 0);
+				var edges = canny.getAllEdges(newImgData);
+				vector = new Vector(edges, canvas);
+				exports.edges = edges;
+				exports.vector = vector;
 			}	
 			dirBtn.onclick = function() {
 				var newImgData = dirMap();
@@ -79,4 +87,4 @@
 	resetBtn.onclick = function() {
 		canvas.ctx.putImageData(canvas.currentImg.imgData, 0, 0);//put back the original image to the canvas
 	}
-}());
+}(this));
