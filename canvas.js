@@ -43,6 +43,12 @@
 		var that = this;
 		var usrImg = new Image();
 		usrImg.onload = function() {
+			if (usrImg.width !== that.width || usrImg.height !== that.height) {
+				that.width = usrImg.width;
+				that.height = usrImg.height;
+				that.elem.width = that.width;
+				that.elem.height = that.height;
+			}
 			that.ctx.drawImage(usrImg, sx || 0, sy || 0);
 			that.currentImg.imgData = that.ctx.getImageData(0, 0, that.elem.width, that.elem.height);
 		}
