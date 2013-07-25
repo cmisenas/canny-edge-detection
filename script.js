@@ -7,6 +7,8 @@
 	}
 
 	var canny = new Canny(canvas);
+	var filters = new Filters(canvas);
+	exports.filters = filters;
 	var vector;
 
 	exports.canvas = canvas;
