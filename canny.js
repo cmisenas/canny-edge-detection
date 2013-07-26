@@ -6,10 +6,12 @@
 		
 		this.grayscale = function(imgData) {
 			var imgDataCopy = canvas.copyImageData(imgData);
+			console.time('Grayscale Time');
 			canvas.runImg(null, function(current) {
 				var grayLevel = (0.3 * imgDataCopy.data[current]) + (0.59 * imgDataCopy.data[current + 1]) + (0.11 * imgDataCopy.data[current + 2]);
 				canvas.setPixel(current, grayLevel, imgDataCopy);
 			});
+			console.timeEnd('Grayscale Time');
 			return imgDataCopy;
 		}
 		
@@ -18,6 +20,7 @@
 			var that = this;
 			var kernel = generateKernel(sigma, size);
 			
+			console.time('Blur Time');
 			canvas.runImg(size, function(current, neighbors) {
 				var resultR = 0;
 				var resultG = 0;
@@ -32,6 +35,7 @@
 				}
 				canvas.setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
 			});
+			console.timeEnd('Blur Time');
 			
 			function generateKernel(sigma, size) {
 				var matrix = [];
@@ -69,6 +73,7 @@
 										 [0, 0, 0],
 										 [-1, -2, -1]];
 
+			console.time('Sobel Filter Time');
 			canvas.runImg(3, function(current, neighbors) {
 				var edgeX = 0;
 				var edgeY = 0;
@@ -89,6 +94,7 @@
 				
 				canvas.setPixel(current, grad, imgDataCopy);
 			});
+			console.timeEnd('Sobel Filter Time');
 			
 			function checkCornerOrBorder(i, width, height) {//returns true if a pixel lies on the border of an image
 				return i - (width * 4) < 0 || i % (width * 4) === 0 || i % (width * 4) === (width * 4) - 4  || i + (width * 4) > width * height * 4;
@@ -116,6 +122,7 @@
 
 		this.nonMaximumSuppress = function(imgData) {
 			var imgDataCopy = canvas.copyImageData(imgData);
+			console.time('NMS Time');
 			canvas.runImg(3, function(current, neighbors) {
 				var pixNeighbors = getNeighbors(imgData.dirMap[current]);
 
@@ -129,6 +136,7 @@
 					canvas.setPixel(current, 0, imgDataCopy);
 				}
 			});
+			console.timeEnd('NMS Time');
 			
 			function getNeighbors(dir) {
 				var degrees = {0 : [{x:1, y:2}, {x:1, y:0}], 45 : [{x: 0, y: 2}, {x: 2, y: 0}], 90 : [{x: 0, y: 1}, {x: 2, y: 1}], 135 : [{x: 0, y: 0}, {x: 2, y: 2}]};
@@ -147,6 +155,7 @@
 				var t2 = 100; //low threshold value
 
 				//first pass
+				console.time('Hysteresis Time');
 				canvas.runImg(null, function(current) {
 					if (imgData.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
 						var group = that.traverseEdge(current, imgData, t2, []);
@@ -164,6 +173,7 @@
 						canvas.setPixel(current, 255, imgDataCopy);
 					}
 				});
+				console.timeEnd('Hysteresis Time');
 
 				return imgDataCopy;
 			}
@@ -172,9 +182,11 @@
 		
 		this.invertColors = function(imgData) {
 			var imgDataCopy = canvas.copyImageData(imgData);
+			console.time('Invert Colors Time');
 			canvas.runImg(null, function(current) {
 				canvas.setPixel(current, {r: 255 - imgDataCopy.data[current], g: 255 - imgDataCopy.data[current + 1], b: 255 - imgDataCopy.data[current + 2]}, imgDataCopy);
 			});
+			console.timeEnd('Invert Colors Time');
 			return imgDataCopy;
 		}
 
@@ -266,6 +278,7 @@
 			var that = this;
 			var traversed = [];
 			var edges = [];
+			console.time('Get Edges Time');
 			canvas.runImg(null, function(current) {
 				if (imgData.data[current] === 255 && traversed[current] === undefined) {//assumes that an edge has white value
 				var group = that.traverseEdge(current, imgData, 255, []);
@@ -275,6 +288,7 @@
 					}
 				}
 			});
+			console.timeEnd('Get Edges Time');
 			return edges;
 		}
 	}
