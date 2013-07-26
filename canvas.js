@@ -58,8 +58,8 @@
 	Canvas.prototype.runImg = function(size, fn) {
 		var that = this;
 
-		for (y = 0; y < this.height; y++) {
-			for (x = 0; x < this.width; x++) {
+		for (var y = 0; y < this.height; y++) {
+			for (var x = 0; x < this.width; x++) {
 				var i = x * 4 + y * this.width * 4;
 				var matrix = getMatrix(x, y, size);
 				fn(i, matrix);
