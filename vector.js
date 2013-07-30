@@ -1,7 +1,0 @@
-;(function(exports) {
-
-	function Vector() {
-
-	}
-
-}());
