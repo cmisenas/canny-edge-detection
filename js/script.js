@@ -9,11 +9,6 @@
 
 	var canny = new Canny(canvas);
 	var filters = new Filters(canvas);
-	exports.filters = filters;
-	var vector;
-
-	exports.canvas = canvas;
-	exports.canny = canny;
 
 	var grayBtn = document.getElementById('gray');
 	var blurBtn = document.getElementById('blur');
@@ -66,9 +61,6 @@
 				var newImgData = hysImgData();
 				canvas.ctx.putImageData(newImgData, 0, 0);
 				var edges = canny.getAllEdges(newImgData);
-				vector = new Vector(edges, canvas);
-				exports.edges = edges;
-				exports.vector = vector;
 			}	
 			dirBtn.onclick = function() {
 				var newImgData = dirMap();
