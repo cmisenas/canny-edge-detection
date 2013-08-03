@@ -3,7 +3,8 @@
 	var canvas = new Canvas('canvas');
 	loadBtn.onclick = function() {
 		var usrImg = document.getElementById('usrImg').value;
-		canvas.loadImg(usrImg.substr(usrImg.lastIndexOf('\\')));
+    console.log(usrImg);
+		canvas.loadImg('img/' + usrImg.substr(usrImg.lastIndexOf('\\')));
 	}
 
 	var canny = new Canny(canvas);
