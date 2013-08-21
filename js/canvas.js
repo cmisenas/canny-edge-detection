@@ -20,7 +20,7 @@
 			this.elem.onmouseover = this.resize;
 			this.elem.onmouseout = function() {
 				this.style.cursor = 'auto';
-			}
+			};
 		}
 	}
 
@@ -34,7 +34,7 @@
 		} else if (e.pageX !== this.offsetLeft + this.width - 1 && e.pageY === this.offsetTop + this.height - 1) {
 			this.style.cursor = 's-resize';
 		}
-	}
+	};
 
 	Canvas.prototype.loadImg = function(img, sx, sy) {
 		this.images.push(img);
@@ -51,9 +51,9 @@
 			}
 			that.ctx.drawImage(usrImg, sx || 0, sy || 0);
 			that.currentImg.imgData = that.ctx.getImageData(0, 0, that.elem.width, that.elem.height);
-		}
+		};
 		usrImg.src = img;
-	}
+	};
 
 	Canvas.prototype.runImg = function(size, fn) {
 		var that = this;
@@ -76,19 +76,19 @@
 			}
 			return matrix;
 		}
-	}
+	};
 
 	Canvas.prototype.copyImageData = function(src) {
 		var dst = this.ctx.createImageData(src.width, src.height);
 		dst.data.set(src.data);
 		return dst;
-	}
+	};
 
 	Canvas.prototype.setPixel = function(i, val, imgData) {
 		imgData.data[i] = typeof val == 'number'? val: val.r;
 		imgData.data[i + 1] = typeof val == 'number'? val: val.g;
 		imgData.data[i + 2] = typeof val == 'number'? val: val.b;
-	}
+	};
 
 	Canvas.prototype.getPixel = function(i, imgData) {
 		if (i < 0 || i > imgData.data.length - 4) {
@@ -96,7 +96,7 @@
 		} else {
 			return {r: imgData.data[i], g: imgData.data[i + 1], b: imgData.data[i + 2], a: imgData.data[i + 3] };
 		}
-	}
+	};
 
 	exports.Canvas = Canvas;
 
