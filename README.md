@@ -19,6 +19,10 @@ node js/server.js
 ```
 Access program on port 8000.
 
+##TODO
++Image uploading.
+Currently, it is not able to upload images (image must already be on the img folder)
+
 
 ##License
 Distributed under the terms of the [GNU General Public License version 3](http://www.gnu.org/copyleft/gpl.html).
