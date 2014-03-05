@@ -151,8 +151,8 @@
       return function() {
         var imgDataCopy = canvas.copyImageData(imgData);
         var realEdges = []; //where real edges will be stored with the 1st pass
-        var t1 = 150; //high threshold value
-        var t2 = 100; //low threshold value
+        var t1 = that.otsuThreshold(imgData); //high threshold value
+        var t2 = t1/2; //low threshold value
 
         //first pass
         console.time('Hysteresis Time');
@@ -290,6 +290,55 @@
       });
       console.timeEnd('Get Edges Time');
       return edges;
+    };
+
+    this.histogram = function(imgData){
+      var hist = new Array(256);
+      for(var i = 0;i<256;i++){
+        hist[i] = 0;
+      }
+      for(var i = 0;i<imgData.data.length;i+=4){
+        hist[imgData.data[i]]++;
+      }
+      return hist;
+    };
+
+    this.otsuThreshold = function(imgData){
+      var histogram = this.histogram(imgData);
+      var total = imgData.width*imgData.height;
+      var sum = 0;
+      for (var i = 1; i < 256; ++i){
+          sum += i * histogram[i];
+      }
+      var sumB = 0;
+      var wB = 0;
+      var wF = 0;
+      var mB;
+      var mF;
+      var max = 0.0;
+      var between = 0.0;
+      var threshold1 = 0.0;
+      var threshold2 = 0.0;
+      for (var i = 0; i < 256; ++i) {
+          wB += histogram[i];
+          if (wB == 0)
+              continue;
+          wF = total - wB;
+          if (wF == 0)
+              break;
+          sumB += i * histogram[i];
+          mB = sumB / wB;
+          mF = (sum - sumB) / wF;
+          between = wB * wF * Math.pow(mB - mF, 2);
+          if ( between >= max ) {
+              threshold1 = i;
+              if ( between > max ) {
+                  threshold2 = i;
+              }
+              max = between;
+          }
+      }
+      return ( threshold1 + threshold2 ) / 2.0;
     };
   }
 
