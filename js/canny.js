@@ -3,7 +3,7 @@
   function Canny(canvElem) {
 
     var canvas = canvElem;
-
+    var otsuThreshold;
     this.grayscale = function(imgData) {
       var imgDataCopy = canvas.copyImageData(imgData);
       console.time('Grayscale Time');
@@ -12,6 +12,7 @@
         canvas.setPixel(current, grayLevel, imgDataCopy);
       });
       console.timeEnd('Grayscale Time');
+      this.otsuThreshold = this.getOtsuThreshold(imgDataCopy);
       return imgDataCopy;
     };
 
@@ -151,7 +152,7 @@
       return function() {
         var imgDataCopy = canvas.copyImageData(imgData);
         var realEdges = []; //where real edges will be stored with the 1st pass
-        var t1 = that.otsuThreshold(imgData); //high threshold value
+        var t1 = that.otsuThreshold; //high threshold value
         var t2 = t1/2; //low threshold value
 
         //first pass
@@ -303,7 +304,7 @@
       return hist;
     };
 
-    this.otsuThreshold = function(imgData){
+    this.getOtsuThreshold = function(imgData){
       var histogram = this.histogram(imgData);
       var total = imgData.width*imgData.height;
       var sum = 0;
