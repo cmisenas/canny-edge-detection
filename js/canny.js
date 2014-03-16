@@ -308,38 +308,31 @@
       var histogram = this.histogram(imgData);
       var total = imgData.width*imgData.height;
       var sum = 0;
-      for (var i = 1; i < 256; ++i){
-          sum += i * histogram[i];
+      for(var i = 0;i<histogram.length;i++){
+        sum += i*histogram[i];
       }
       var sumB = 0;
+      var sumF = 0;
       var wB = 0;
       var wF = 0;
-      var mB;
-      var mF;
-      var max = 0.0;
-      var between = 0.0;
-      var threshold1 = 0.0;
-      var threshold2 = 0.0;
-      for (var i = 0; i < 256; ++i) {
-          wB += histogram[i];
-          if (wB == 0)
-              continue;
-          wF = total - wB;
-          if (wF == 0)
-              break;
-          sumB += i * histogram[i];
-          mB = sumB / wB;
-          mF = (sum - sumB) / wF;
-          between = wB * wF * Math.pow(mB - mF, 2);
-          if ( between >= max ) {
-              threshold1 = i;
-              if ( between > max ) {
-                  threshold2 = i;
-              }
-              max = between;
-          }
+      var maxVar = 0;
+      var resT = 0;
+      for(var t = 0;t<256;t++){
+        wB += histogram[t];
+        if(wB == 0) continue;
+        wF = total - wB;
+        if(wF == 0) break;
+        sumB += (t * histogram[t]);
+        sumF = sum - sumB;
+        var meanB = sumB / wB;
+        var meanF = sumF / wF;
+        var variance = wB * wF * Math.pow(meanB - meanF,2);
+        if(variance > maxVar){
+          maxVar = variance;
+          resT = t;
+        }
       }
-      return ( threshold1 + threshold2 ) / 2.0;
+      return resT;
     };
   }
 
