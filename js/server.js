@@ -24,6 +24,81 @@ var serveErrorPage = function(response) {
   });
 };
 
+var getBoundary = function(contentHeader) {
+  return contentHeader.substr(contentHeader.indexOf('boundary=') + 'boundary='.length);
+};
+
+var containsFileHeaders = function(asciiChunk) {
+  if(asciiChunk.indexOf('Content-Disposition') > -1 || asciiChunk.indexOf('Content-Type') > -1) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+var removeHeaders = function (chunk) {
+  var delimiter = "\r\n";
+  var cleanBuffer;
+  chunkArr = chunk.split(delimiter);
+  cleanBufferArr = [];
+  for(var i = 0; i < chunkArr.length; i++) {
+    if(!containsFileHeaders(chunkArr[i])) {
+      cleanBufferArr.push(chunkArr[i]);
+    }
+  }
+  if(cleanBufferArr[0] === '') {
+    cleanBufferArr = cleanBufferArr.slice(1)
+  }
+  cleanBuffer = cleanBufferArr.join(delimiter);
+
+  return cleanBuffer;
+};
+
+var uploadFile = function(request, response, boundary) {
+  var file = fs.createWriteStream('copy');
+  var fileSize = request.headers['content-length'];
+  var chunkNumber = 0;
+  var currentUploadSize = 0;
+
+  request.on('data', function(chunk) {
+    var chunkLength = chunk.length;
+    var shouldWriteBuffer = true;
+    currentUploadSize += chunkLength;
+    chunkNumber++;
+    uploadProgress = Math.round((currentUploadSize/fileSize) * 100);
+
+    if (chunkNumber == 1) {
+      chunk = chunk.slice(42);
+    } else if (uploadProgress === 100) {
+      if(chunkLength < 44) {
+        shouldWriteBuffer = false;
+      } else {
+        chunk = chunk.slice(0, chunk.length - 44);
+      }
+    }
+
+    var asciiChunk = chunk.toString('binary');
+    if (containsFileHeaders(asciiChunk)) {
+      chunk = new Buffer(removeHeaders(asciiChunk), 'binary');
+    }
+
+    if (shouldWriteBuffer) {
+      var bufferStore = file.write(chunk);
+      if(bufferStore == false) {
+        request.pause();
+      }
+    }
+  });
+
+   file.on('drain', function() {
+       request.resume();
+   });
+
+  request.on('end', function() {
+    response.writeHead(200);
+    response.end("Upload done.");
+  });
+};
 
 var startServer = function() {
   var PORT = 8000;
@@ -35,6 +110,8 @@ var startServer = function() {
                request.method.toUpperCase() === 'POST' &&
                request.headers['content-type'].indexOf('multipart/form-data') > -1) {
       console.log('Uploading...');
+      boundary = getBoundary(request.headers['content-type'])
+      uploadFile(request, response, boundary)
     } else {
       var type = pathname.indexOf('.js') > -1 ? 'text/javascript' :
                  pathname.indexOf('.html') > -1 ? 'text/html' :
