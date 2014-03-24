@@ -14,7 +14,10 @@
   </head>
   <body>
     <div>
-      <input type="file" id="usrImg"/><button id="load">Load</button><br/>
+      <form action="/upload" method="post" accept-charset="utf-8" enctype="multipart/form-data">
+        <input type="file" name="image-upload" />
+        <input type="submit" value="Upload Image" />
+      </form>
       <button id="gray">Grayscale</button><br/>
       <button id="blur">Gaussian Blur</button> Kernel Size:<input type="text" id="size" size="1"/> Sigma:<input type="text" id="sigma" size="1"/><br/>
       <button id="sobel">Sobel</button><br/>

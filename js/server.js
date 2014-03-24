@@ -31,6 +31,10 @@ var startServer = function() {
     var pathname = url.parse(req.url).pathname.substring(1);
     if (pathname === '') {
       serveStaticFile('index.html', 'text/html', res);
+    } else if (pathname === 'upload' &&
+               request.method.toUpperCase() === 'POST' &&
+               request.headers['content-type'].indexOf('multipart/form-data') > -1) {
+      console.log('Uploading...');
     } else {
       var type = pathname.indexOf('.js') > -1 ? 'text/javascript' :
                  pathname.indexOf('.html') > -1 ? 'text/html' :
