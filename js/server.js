@@ -102,10 +102,10 @@ var uploadFile = function(request, response, boundary) {
 
 var startServer = function() {
   var PORT = 8000;
-  var app = http.createServer(function(req, res){
-    var pathname = url.parse(req.url).pathname.substring(1);
+  var app = http.createServer(function(request, response){
+    var pathname = url.parse(request.url).pathname.substring(1);
     if (pathname === '') {
-      serveStaticFile('index.html', 'text/html', res);
+      serveStaticFile('index.html', 'text/html', response);
     } else if (pathname === 'upload' &&
                request.method.toUpperCase() === 'POST' &&
                request.headers['content-type'].indexOf('multipart/form-data') > -1) {
@@ -119,7 +119,7 @@ var startServer = function() {
                  pathname.indexOf('.png') > -1 ? 'image/png' :
                  pathname.indexOf('.jpg') > -1 || pathname.indexOf('.jpeg') > -1 ? 'image/jpeg' :
                  'text/plain';
-      serveStaticFile(pathname, type, res);
+      serveStaticFile(pathname, type, response);
     }
   }).listen(PORT);
   console.log("Server started on port", PORT);
