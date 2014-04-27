@@ -1,12 +1,5 @@
 ;(function(exports) {
-  var loadBtn = document.getElementById('load');
   var canvas = new Canvas('canvas');
-  loadBtn.onclick = function() {
-    var usrImg = document.getElementById('usrImg').value;
-    console.log(usrImg);
-    canvas.loadImg('img/' + usrImg.substr(usrImg.lastIndexOf('\\')));
-  };
-
   var canny = new Canny(canvas),
       filters = new Filters(canvas);
 
