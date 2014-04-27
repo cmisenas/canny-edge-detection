@@ -13,6 +13,16 @@
       invertBtn = document.getElementById('invert'),
       resetBtn = document.getElementById('reset');
 
+  function checkForImg() {
+    var params = window.location.search;
+    var imgFile;
+    if (params !== '' && params.indexOf("img=") > -1) {
+      imgFile = params.substring(params.indexOf("img=") + 4);
+      console.log(imgFile);
+      canvas.loadImg('uploads/' + imgFile);
+    }
+  }
+
   grayBtn.onclick = function() {
     var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
     var newImgData = canny.grayscale(currentImgData);
@@ -77,4 +87,5 @@
     canvas.ctx.putImageData(canvas.currentImg.imgData, 0, 0);//put back the original image to the canvas
   };
 
+  checkForImg();
 }(this));

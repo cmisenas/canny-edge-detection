@@ -119,7 +119,8 @@ var uploadFile = function(request, response, boundary) {
 
     if (shouldWriteBuffer) {
       if (file === undefined || file === null) {
-        file = fs.createWriteStream("uploads/" + stripIllegalChars(composite.headers['filename']));
+        fileName = stripIllegalChars(composite.headers['filename']);
+        file = fs.createWriteStream("uploads/" + fileName);
       }
       var bufferStore = file.write(chunk);
       if(bufferStore == false) {
@@ -133,8 +134,10 @@ var uploadFile = function(request, response, boundary) {
   });
 
   request.on('end', function() {
-    response.writeHead(200);
-    response.end("Upload done.");
+    response.writeHead(302, {
+        'Location': '/?img=' + fileName
+    });
+    response.end();
   });
 };
 
