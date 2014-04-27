@@ -81,6 +81,10 @@ var formHeaders = function(headerArr) {
   return headers
 };
 
+var stripIllegalChars = function(filename) {
+  return filename.replace(/[^a-zA-Z0-9\.]/g, '');
+};
+
 var uploadFile = function(request, response, boundary) {
   var file, fileName;
   var fileSize = request.headers['content-length'];
@@ -115,7 +119,7 @@ var uploadFile = function(request, response, boundary) {
 
     if (shouldWriteBuffer) {
       if (file === undefined || file === null) {
-        file = fs.createWriteStream("uploads/" + composite.headers['filename']);
+        file = fs.createWriteStream("uploads/" + stripIllegalChars(composite.headers['filename']));
       }
       var bufferStore = file.write(chunk);
       if(bufferStore == false) {
