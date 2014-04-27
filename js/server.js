@@ -36,29 +36,58 @@ var containsFileHeaders = function(asciiChunk) {
   }
 };
 
-var removeHeaders = function (chunk) {
+var separateHeaders = function (chunk) {
   var delimiter = "\r\n";
-  var cleanBuffer;
+  var cleanBuffer, headers;
   chunkArr = chunk.split(delimiter);
-  cleanBufferArr = [];
+  var cleanBufferArr = [], headersArr = [];
   for(var i = 0; i < chunkArr.length; i++) {
     if(!containsFileHeaders(chunkArr[i])) {
       cleanBufferArr.push(chunkArr[i]);
+    } else {
+      headersArr.push(chunkArr[i]);
     }
   }
   if(cleanBufferArr[0] === '') {
     cleanBufferArr = cleanBufferArr.slice(1)
   }
   cleanBuffer = cleanBufferArr.join(delimiter);
+  headers = formHeaders(headersArr);
 
-  return cleanBuffer;
+  return {
+    headers: headers,
+    chunk: cleanBuffer
+  };
+};
+
+var formHeaders = function(headerArr) {
+  var headers = {};
+  var currentLine, currentField, field;
+  for (var i = 0; i < headerArr.length; i++) {
+    currentLine = headerArr[i].split(": ");
+    field = currentLine.splice(0, 1)[0];
+    currentLine = currentLine.join(": ").split("; ");
+    if (currentLine.length >  1) {
+      for (var j = 0; j < currentLine.length; j++) {
+        currentField = currentLine[j].split("=");
+        if (currentField.length > 1 ) {
+          headers[currentField[0].toLowerCase()] = currentField[1];
+        }
+      }
+    } else {
+      headers[field.toLowerCase()] = currentField[0];
+    }
+  }
+  return headers
 };
 
 var uploadFile = function(request, response, boundary) {
-  var file = fs.createWriteStream('copy');
+  var file, fileName;
   var fileSize = request.headers['content-length'];
   var chunkNumber = 0;
   var currentUploadSize = 0;
+
+  console.log("Boundary: ", boundary);
 
   request.on('data', function(chunk) {
     var chunkLength = chunk.length;
@@ -79,20 +108,25 @@ var uploadFile = function(request, response, boundary) {
 
     var asciiChunk = chunk.toString('binary');
     if (containsFileHeaders(asciiChunk)) {
-      chunk = new Buffer(removeHeaders(asciiChunk), 'binary');
+      var composite = separateHeaders(asciiChunk);
+      console.log("Headers: ", composite.headers);
+      chunk = new Buffer(composite.chunk, 'binary');
     }
 
     if (shouldWriteBuffer) {
+      if (file === undefined || file === null) {
+        file = fs.createWriteStream("uploads/" + composite.headers['filename']);
+      }
       var bufferStore = file.write(chunk);
       if(bufferStore == false) {
         request.pause();
       }
+
+      file.on('drain', function() {
+        request.resume();
+      });
     }
   });
-
-   file.on('drain', function() {
-       request.resume();
-   });
 
   request.on('end', function() {
     response.writeHead(200);
@@ -109,7 +143,6 @@ var startServer = function() {
     } else if (pathname === 'upload' &&
                request.method.toUpperCase() === 'POST' &&
                request.headers['content-type'].indexOf('multipart/form-data') > -1) {
-      console.log('Uploading...');
       boundary = getBoundary(request.headers['content-type'])
       uploadFile(request, response, boundary)
     } else {
