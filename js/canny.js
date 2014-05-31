@@ -3,7 +3,7 @@
   function Canny(canvElem) {
 
     var canvas = canvElem;
-
+    var otsuThreshold;
     this.grayscale = function(imgData) {
       var imgDataCopy = canvas.copyImageData(imgData);
       console.time('Grayscale Time');
@@ -12,6 +12,7 @@
         canvas.setPixel(current, grayLevel, imgDataCopy);
       });
       console.timeEnd('Grayscale Time');
+      this.otsuThreshold = this.getOtsuThreshold(imgDataCopy);
       return imgDataCopy;
     };
 
@@ -151,8 +152,8 @@
       return function() {
         var imgDataCopy = canvas.copyImageData(imgData);
         var realEdges = []; //where real edges will be stored with the 1st pass
-        var t1 = 150; //high threshold value
-        var t2 = 100; //low threshold value
+        var t1 = that.otsuThreshold; //high threshold value
+        var t2 = t1/2; //low threshold value
 
         //first pass
         console.time('Hysteresis Time');
@@ -290,6 +291,48 @@
       });
       console.timeEnd('Get Edges Time');
       return edges;
+    };
+
+    this.histogram = function(imgData){
+      var hist = new Array(256);
+      for(var i = 0;i<256;i++){
+        hist[i] = 0;
+      }
+      for(var i = 0;i<imgData.data.length;i+=4){
+        hist[imgData.data[i]]++;
+      }
+      return hist;
+    };
+
+    this.getOtsuThreshold = function(imgData){
+      var histogram = this.histogram(imgData);
+      var total = imgData.width*imgData.height;
+      var sum = 0;
+      for(var i = 0;i<histogram.length;i++){
+        sum += i*histogram[i];
+      }
+      var sumB = 0;
+      var sumF = 0;
+      var wB = 0;
+      var wF = 0;
+      var maxVar = 0;
+      var resT = 0;
+      for(var t = 0;t<256;t++){
+        wB += histogram[t];
+        if(wB == 0) continue;
+        wF = total - wB;
+        if(wF == 0) break;
+        sumB += (t * histogram[t]);
+        sumF = sum - sumB;
+        var meanB = sumB / wB;
+        var meanF = sumF / wF;
+        var variance = wB * wF * Math.pow(meanB - meanF,2);
+        if(variance > maxVar){
+          maxVar = variance;
+          resT = t;
+        }
+      }
+      return resT;
     };
   }
 
