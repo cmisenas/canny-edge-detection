@@ -1,4 +1,5 @@
-;(function (exports) {
+(function (exports) {
+  'use strict';
 
   function Filters(cvs) {
     var canvas = cvs;

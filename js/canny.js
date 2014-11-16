@@ -1,8 +1,7 @@
-;(function (exports) {
+(function (exports) {
+  'use strict';
 
-  function Canny(canvElem) {
-
-    var canvas = canvElem;
+  function Canny(canvas) {
 
     this.grayscale = function (imgData) {
       var imgDataCopy = canvas.copyImageData(imgData);
@@ -184,7 +183,6 @@
       };
     };
 
-
     this.invertColors = function (imgData) {
       var imgDataCopy = canvas.copyImageData(imgData);
       console.time('Invert Colors Time');
@@ -241,7 +239,7 @@
       };
     };
 
-    //helper functions
+    // helper functions
     this.sum = function (arr) {//receives an array and returns sum
       var result = 0;
       for (var i = 0; i < arr.length; i++) {
@@ -262,7 +260,6 @@
       }
       return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
     };
-
 
     this.getNeighborEdges = function (i, imgData, threshold, includedEdges) {
       var neighbors = [];

@@ -1,4 +1,5 @@
-;(function (exports) {
+(function (exports) {
+  'use strict';
 
   function Canvas(id, w, h, res) {
     this.elem = document.getElementById(id);

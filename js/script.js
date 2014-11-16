@@ -1,24 +1,28 @@
-;(function (exports) {
-  var loadBtn = document.getElementById('load');
+(function () {
+  'use strict';
+
+  var $byId = document.getElementById.bind(document);
+
+  var loadBtn = $byId('load');
   var canvas = new Canvas('canvas');
+
   loadBtn.onclick = function () {
-    var usrImg = document.getElementById('usrImg').value;
+    var usrImg = $byId('usrImg').value;
     console.log(usrImg);
-    canvas.loadImg('img/' + usrImg.substr(usrImg.lastIndexOf('\\')));
+    canvas.loadImg('img' + usrImg.substr(usrImg.lastIndexOf('\\')));
   };
 
-  var canny = new Canny(canvas),
-    filters = new Filters(canvas);
+  var canny = new Canny(canvas);
 
-  var grayBtn = document.getElementById('gray'),
-    blurBtn = document.getElementById('blur'),
-    sobelBtn = document.getElementById('sobel'),
-    nmsBtn = document.getElementById('nms'),
-    hysBtn = document.getElementById('hys'),
-    dirBtn = document.getElementById('dirmap'),
-    gradBtn = document.getElementById('gradmap'),
-    invertBtn = document.getElementById('invert'),
-    resetBtn = document.getElementById('reset');
+  var grayBtn = $byId('gray');
+  var blurBtn = $byId('blur');
+  var sobelBtn = $byId('sobel');
+  var nmsBtn = $byId('nms');
+  var hysBtn = $byId('hys');
+  var dirBtn = $byId('dirmap');
+  var gradBtn = $byId('gradmap');
+  var invertBtn = $byId('invert');
+  var resetBtn = $byId('reset');
 
   grayBtn.onclick = function () {
     var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
@@ -28,9 +32,9 @@
 
   blurBtn.onclick = function () {
     var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
-    var size = Number(document.getElementById('size').value);
+    var size = Number($byId('size').value);
     size = (size <= 1 || size > 21) ? 3 : (size % 2 === 0) ? size - 1 : size;
-    var sigma = Number(document.getElementById('sigma').value);
+    var sigma = Number($byId('sigma').value);
     sigma = (sigma < 1 || sigma > 10) ? 1.5 : sigma;
     var newImgData = canny.gaussianBlur(currentImgData, sigma, size);
     canvas.ctx.putImageData(newImgData, 0, 0);
@@ -84,4 +88,4 @@
     canvas.ctx.putImageData(canvas.currentImg.imgData, 0, 0);//put back the original image to the canvas
   };
 
-}(this));
+}());
