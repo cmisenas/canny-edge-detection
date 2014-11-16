@@ -1,7 +1,10 @@
 node_modules
+npm-debug.log
 docs
 *.swp
 *.swo
+.idea/
+.editorconfig
 
 # Compiled source #
 ###################
