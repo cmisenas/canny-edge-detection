@@ -16,17 +16,18 @@ A process called hysteresis is used where there are two thresholds--high and low
 You'll need [Node.js](http://nodejs.org/) installed.
 Go to root directory of the project and start by entering the following on your terminal:
 ```
-node js/server.js
+$ npm start
 ```
-Access program on port 8000.
+Access program on port http://localhost:8000/.
 
 ## TODO
 
-+ Image uploading.  
-  Currently, it is not able to upload images (image must already be on the img folder)
+- [ ] Image uploading.
+Currently, it is not able to upload images (image must already be on the img folder)
 
 
 ## License
+
 Distributed under the terms of the [GNU General Public License version 3](http://www.gnu.org/copyleft/gpl.html).
 
 ```
