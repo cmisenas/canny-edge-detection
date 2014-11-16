@@ -1,5 +1,5 @@
-Canny Edge Detection
-====================
+# Canny Edge Detection
+
 Works the following way:
 
 1. Convert the canvas image to grayscale
@@ -11,7 +11,8 @@ This is done by convolving image with Sobel filter.
 5. Remove weak/false edges. 
 A process called hysteresis is used where there are two thresholds--high and low--to be compared to each pixel.
 
-##Usage
+## Usage
+
 You'll need [Node.js](http://nodejs.org/) installed.
 Go to root directory of the project and start by entering the following on your terminal:
 ```
@@ -19,12 +20,13 @@ node js/server.js
 ```
 Access program on port 8000.
 
-##TODO
+## TODO
+
 + Image uploading.  
   Currently, it is not able to upload images (image must already be on the img folder)
 
 
-##License
+## License
 Distributed under the terms of the [GNU General Public License version 3](http://www.gnu.org/copyleft/gpl.html).
 
 ```
