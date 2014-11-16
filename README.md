@@ -18,11 +18,11 @@ Go to root directory of the project and start by entering the following on your 
 ```
 $ npm start
 ```
-Access program on port http://localhost:8000/.
+Access program on port [http://localhost:8000/][http://localhost:8000/].
 
 ## TODO
 
-- [ ] Image uploading.
+- [ ] Image uploading.<br />
 Currently, it is not able to upload images (image must already be on the img folder)
 
 
