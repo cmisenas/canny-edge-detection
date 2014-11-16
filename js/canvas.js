@@ -5,6 +5,7 @@
     this.elem = document.getElementById(id);
     this.width = w || 600;
     this.height = h || 400;
+
     if (this.elem === null) {
       this.elem = document.createElement('canvas');
       this.elem.id = id;
@@ -12,11 +13,13 @@
       this.elem.height = this.height;
       document.body.insertBefore(this.elem, document.body.firstChild);
     }
+
     this.ctx = this.elem.getContext('2d');
     this.images = [];
     this.currentImg = {};
 
     var resizable = res || true;
+
     if (resizable === true) {
       this.elem.onmouseover = this.resize;
       this.elem.onmouseout = function () {
@@ -67,14 +70,17 @@
       }
     }
 
-    function getMatrix(cx, cy, size) {//will generate a 2d array of sizexsize given center x, center y, size, image width & height
+    // will generate a 2d array of sizexsize given center x, center y, size, image width & height
+    function getMatrix(cx, cy, size) {
       var matrix = [];
+
       for (var i = 0, y = -(size - 1) / 2; i < size; i++, y++) {
         matrix[i] = [];
         for (var j = 0, x = -(size - 1) / 2; j < size; j++, x++) {
           matrix[i][j] = (cx + x) * 4 + (cy + y) * that.width * 4;
         }
       }
+
       return matrix;
     }
   };
@@ -92,11 +98,15 @@
   };
 
   Canvas.prototype.getPixel = function (i, imgData) {
+    var result = null;
+
     if (i < 0 || i > imgData.data.length - 4) {
-      return {r: 255, g: 255, b: 255, a: 255};
+      result = {r: 255, g: 255, b: 255, a: 255};
     } else {
-      return {r: imgData.data[i], g: imgData.data[i + 1], b: imgData.data[i + 2], a: imgData.data[i + 3]};
+      result = {r: imgData.data[i], g: imgData.data[i + 1], b: imgData.data[i + 2], a: imgData.data[i + 3]};
     }
+
+    return result;
   };
 
   exports.Canvas = Canvas;
