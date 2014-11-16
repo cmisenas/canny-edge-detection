@@ -4,6 +4,7 @@ docs
 *.swp
 *.swo
 .idea/
+.editorconfig
 
 # Compiled source #
 ###################
