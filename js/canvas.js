@@ -14,14 +14,6 @@
     this.ctx = this.elem.getContext('2d');
     this.images = [];
     this.currentImg = {};
-
-    var resizable = res || true;
-    if (resizable === true) {
-      this.elem.onmouseover = this.resize;
-      this.elem.onmouseout = function() {
-        this.style.cursor = 'auto';
-      };
-    }
   }
 
   Canvas.prototype.resize = function(e) {
@@ -37,11 +29,12 @@
   };
 
   Canvas.prototype.loadImg = function(img, sx, sy) {
+    var that = this;
+    var usrImg = new Image();
+
     this.images.push(img);
     this.currentImg.index = this.images.indexOf(img);
 
-    var that = this;
-    var usrImg = new Image();
     usrImg.onload = function() {
       if (usrImg.width !== that.width || usrImg.height !== that.height) {
         that.width = usrImg.width;
