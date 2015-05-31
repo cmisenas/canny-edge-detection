@@ -129,18 +129,6 @@
     };
   };
 
-
-  Canny.prototype.invertColors = function(imgData) {
-    var imgDataCopy = this.canvas.copyImageData(imgData),
-        that = this;
-    console.time('Invert Colors Time');
-    this.canvas.runImg(null, function(current) {
-      that.canvas.setPixel(current, {r: 255 - imgDataCopy.data[current], g: 255 - imgDataCopy.data[current + 1], b: 255 - imgDataCopy.data[current + 2]}, imgDataCopy);
-    });
-    console.timeEnd('Invert Colors Time');
-    return imgDataCopy;
-  };
-
   Canny.prototype.showDirMap = function(imgData) {//just a quick function to look at the direction results
     var that = this;
     return function() {

@@ -79,7 +79,7 @@
 
   invertBtn.onclick = function() {
     var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
-    var newImgData = canny.invertColors(currentImgData);
+    var newImgData = filters.invertColors(currentImgData);
     canvas.ctx.putImageData(newImgData, 0, 0);
   };
 
