@@ -25,7 +25,7 @@
 
   grayBtn.onclick = function() {
     var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
-    var newImgData = canny.grayscale(currentImgData);
+    var newImgData = filters.grayscale(currentImgData);
     canvas.ctx.putImageData(newImgData, 0, 0);
   };
 
@@ -35,7 +35,7 @@
     size = (size <= 1 || size > 21) ? 3 : (size % 2 === 0) ? size - 1 : size;
     var sigma = Number(document.getElementById('sigma').value);
     sigma = (sigma < 1 || sigma > 10) ? 1.5 : sigma;
-    var newImgData = canny.gaussianBlur(currentImgData, sigma, size);
+    var newImgData = filters.gaussianBlur(currentImgData, sigma, size);
     canvas.ctx.putImageData(newImgData, 0, 0);
   };
 

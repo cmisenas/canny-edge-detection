@@ -1,64 +1,7 @@
 ;(function(exports){
 
   function Canny(canvElem) {
-
     var canvas = canvElem;
-
-    this.grayscale = function(imgData) {
-      var imgDataCopy = canvas.copyImageData(imgData);
-      console.time('Grayscale Time');
-      canvas.runImg(null, function(current) {
-        var grayLevel = (0.3 * imgDataCopy.data[current]) + (0.59 * imgDataCopy.data[current + 1]) + (0.11 * imgDataCopy.data[current + 2]);
-        canvas.setPixel(current, grayLevel, imgDataCopy);
-      });
-      console.timeEnd('Grayscale Time');
-      return imgDataCopy;
-    };
-
-    this.gaussianBlur = function(imgData, sigma, size) {
-      var imgDataCopy = canvas.copyImageData(imgData);
-      var that = this;
-      var kernel = generateKernel(sigma, size);
-
-      console.time('Blur Time');
-      canvas.runImg(size, function(current, neighbors) {
-        var resultR = 0;
-        var resultG = 0;
-        var resultB = 0;
-        for (var i = 0; i < size; i++) {
-          for (var j = 0; j < size; j++) {
-            var pixel = canvas.getPixel(neighbors[i][j], imgData);
-            resultR += pixel.r * kernel[i][j];//return the existing pixel value multiplied by the kernel matrix
-            resultG += pixel.g * kernel[i][j];
-            resultB += pixel.b * kernel[i][j];
-          }
-        }
-        canvas.setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
-      });
-      console.timeEnd('Blur Time');
-
-      function generateKernel(sigma, size) {
-        var matrix = [];
-        var E = 2.718;//Euler's number rounded of to 3 places
-        for (var y = -(size - 1)/2, i = 0; i < size; y++, i++) {
-          matrix[i] = [];
-          for (var x = -(size - 1)/2, j = 0; j < size; x++, j++) {
-            //create matrix round to 3 decimal places
-            matrix[i][j] = 1/(2 * Math.PI * Math.pow(sigma, 2)) * Math.pow(E, -(Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2))/(2 * Math.pow(sigma, 2)));
-          }
-        }
-        //normalize the matrix to make its sum 1
-        var normalize = 1/that.sum(matrix);
-        for (var k = 0; k < matrix.length; k++) {
-          for (var l = 0; l < matrix[k].length; l++) {
-            matrix[k][l] = Math.round(normalize * matrix[k][l] * 1000)/1000;
-          }
-        }
-        return matrix;
-      }
-
-      return imgDataCopy;
-    };
 
     this.sobel = function(imgData) {//find intensity gradient of image
       var imgDataCopy = canvas.copyImageData(imgData);
@@ -66,12 +9,12 @@
       var gradMap = [];
       //perform vertical convolution
       var xfilter = [[-1, 0, 1],
-          [-2, 0, 2],
-          [-1, 0, 1]];
+                     [-2, 0, 2],
+                     [-1, 0, 1]];
       //perform horizontal convolution
       var yfilter = [[1, 2, 1],
-          [0, 0, 0],
-          [-1, -2, -1]];
+                     [0, 0, 0],
+                     [-1, -2, -1]];
 
       console.time('Sobel Filter Time');
       canvas.runImg(3, function(current, neighbors) {
@@ -193,7 +136,7 @@
     this.showDirMap = function(imgData) {//just a quick function to look at the direction results
       return function() {
         var imgDataCopy = canvas.copyImageData(imgData);
-        canvas.runImg(null, function(i) { 
+        canvas.runImg(null, function(i) {
           if (imgData.dirMap[i] === 0) {
             canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
           } else if (imgData.dirMap[i] === 45) {
@@ -213,7 +156,7 @@
     this.showGradMap = function(imgData) {
       return function() {
         var imgDataCopy = canvas.copyImageData(imgData);
-        canvas.runImg(null, function(i) { 
+        canvas.runImg(null, function(i) {
           if (imgData.gradMap[i] < 0) {
             canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
           } else if (imgData.gradMap[i] < 200) {
@@ -259,14 +202,14 @@
       var neighbors = [];
       var directions = [
         i + 4, //e
-          i - imgData.width * 4 + 4, //ne
-          i - imgData.width * 4, //n
-          i - imgData.width * 4 - 4, //nw
-          i - 4, //w
-          i + imgData.width * 4 - 4, //sw
-          i + imgData.width * 4, //s
-          i + imgData.width * 4 + 4 //se
-            ];
+        i - imgData.width * 4 + 4, //ne
+        i - imgData.width * 4, //n
+        i - imgData.width * 4 - 4, //nw
+        i - 4, //w
+        i + imgData.width * 4 - 4, //sw
+        i + imgData.width * 4, //s
+        i + imgData.width * 4 + 4 //se
+      ];
       for(var j = 0; j < directions.length; j++)
         if(imgData.data[directions[j]] >= threshold && (includedEdges === undefined || includedEdges.indexOf(directions[j]) === -1))
           neighbors.push(directions[j]);
