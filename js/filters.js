@@ -28,7 +28,7 @@
   };
 
   Filters.prototype.threshold = function(imgData, t) {
-    var imgDataCopy = this.canvas.copyImageData(imgData),
+    var imgDataCopy = this.canvas.getCurrImgData(),
         threshold = t || 100, //default threshold
         that = this,
         grayLevel;
@@ -46,7 +46,7 @@
   };
 
   Filters.prototype.grayscale = function(imgData) {
-    var imgDataCopy = this.canvas.copyImageData(imgData),
+    var imgDataCopy = this.canvas.getCurrImgData(),
         that = this,
         grayLevel;
 
@@ -61,7 +61,7 @@
   };
 
   Filters.prototype.gaussianBlur = function(imgData, sigma, size) {
-    var imgDataCopy = this.canvas.copyImageData(imgData),
+    var imgDataCopy = this.canvas.getCurrImgData(),
         that = this,
         kernel = generateKernel(sigma, size);
 
@@ -85,7 +85,7 @@
   };
 
   Filters.prototype.invertColors = function(imgData) {
-    var imgDataCopy = this.canvas.copyImageData(imgData),
+    var imgDataCopy = this.canvas.getCurrImgData(),
         that = this,
         pixel;
 

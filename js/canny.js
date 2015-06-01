@@ -5,7 +5,7 @@
 
   //find intensity gradient of image
   Canny.prototype.sobel = function(imgData) {
-    var imgDataCopy = this.canvas.copyImageData(imgData),
+    var imgDataCopy = this.canvas.getCurrImgData(),
         dirMap = [],
         gradMap = [],
         dir, grad,
@@ -69,8 +69,9 @@
   };
 
   Canny.prototype.nonMaximumSuppress = function(imgData) {
-    var imgDataCopy = this.canvas.copyImageData(imgData),
+    var imgDataCopy = this.canvas.getCurrImgData(),
         that = this;
+
     console.time('NMS Time');
     this.canvas.runImg(3, function(current, neighbors) {
       var pixNeighbors = getNeighbors(imgData.dirMap[current]);
@@ -97,80 +98,74 @@
 
   //mark strong and weak edges, discard others as false edges; only keep weak edges that are connected to strong edges
   Canny.prototype.hysteresis = function(imgData){
-    var that = this;
-    return function() {
-      var imgDataCopy = that.canvas.copyImageData(imgData);
-      var realEdges = []; //where real edges will be stored with the 1st pass
-      var t1 = 150; //high threshold value
-      var t2 = 100; //low threshold value
+    var that = this,
+        imgDataCopy = that.canvas.getCurrImgData(),
+        realEdges = [], //where real edges will be stored with the 1st pass
+        t1 = 150, //high threshold value
+        t2 = 100; //low threshold value
 
-      //first pass
-      console.time('Hysteresis Time');
-      that.canvas.runImg(null, function(current) {
-        if (imgData.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
-          var group = that.traverseEdge(current, imgData, t2, []);
-          for(var i = 0; i < group.length; i++){
-            realEdges[group[i]] = true;
-          }
+    //first pass
+    console.time('Hysteresis Time');
+    this.canvas.runImg(null, function(current) {
+      if (imgData.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
+        var group = that.traverseEdge(current, imgData, t2, []);
+        for(var i = 0; i < group.length; i++){
+          realEdges[group[i]] = true;
         }
-      });
+      }
+    });
 
-      //second pass
-      that.canvas.runImg(null, function(current) {
-        if (realEdges[current] === undefined) {
-          that.canvas.setPixel(current, 0, imgDataCopy);
-        } else {
-          that.canvas.setPixel(current, 255, imgDataCopy);
-        }
-      });
-      console.timeEnd('Hysteresis Time');
+    //second pass
+    this.canvas.runImg(null, function(current) {
+      if (realEdges[current] === undefined) {
+        that.canvas.setPixel(current, 0, imgDataCopy);
+      } else {
+        that.canvas.setPixel(current, 255, imgDataCopy);
+      }
+    });
+    console.timeEnd('Hysteresis Time');
 
-      return imgDataCopy;
-    };
+    return imgDataCopy;
   };
 
   Canny.prototype.showDirMap = function(imgData) {//just a quick function to look at the direction results
-    var that = this;
-    return function() {
-      var imgDataCopy = that.canvas.copyImageData(imgData);
-      that.canvas.runImg(null, function(i) {
-        if (imgData.dirMap[i] === 0) {
-          that.canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
-        } else if (imgData.dirMap[i] === 45) {
-          that.canvas.setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
-        } else if (imgData.dirMap[i] === 90) {
-          that.canvas.setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
-        } else if (imgData.dirMap[i] === 135) {
-          that.canvas.setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
-        } else {
-          that.canvas.setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
-        }
-      });
-      return imgDataCopy;
-    };
+    var that = this,
+        imgDataCopy = this.canvas.getCurrImgData();
+    this.canvas.runImg(null, function(i) {
+      if (imgData.dirMap[i] === 0) {
+        that.canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
+      } else if (imgData.dirMap[i] === 45) {
+        that.canvas.setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
+      } else if (imgData.dirMap[i] === 90) {
+        that.canvas.setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
+      } else if (imgData.dirMap[i] === 135) {
+        that.canvas.setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
+      } else {
+        that.canvas.setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
+      }
+    });
+    return imgDataCopy;
   };
 
   Canny.prototype.showGradMap = function(imgData) {
-    var that = this;
-    return function() {
-      var imgDataCopy = that.canvas.copyImageData(imgData);
-      that.canvas.runImg(null, function(i) {
-        if (imgData.gradMap[i] < 0) {
-          that.canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
-        } else if (imgData.gradMap[i] < 200) {
-          that.canvas.setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
-        } else if (imgData.gradMap[i] < 400) {
-          that.canvas.setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
-        } else if (imgData.gradMap[i] < 600) {
-          that.canvas.setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
-        } else if (imgData.gradMap[i] < 800) {
-          that.canvas.setPixel(i, {r: 0, g: 255, b: 255}, imgDataCopy);
-        } else {
-          that.canvas.setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
-        }
-      });
-      return imgDataCopy;
-    };
+    var that = this,
+        imgDataCopy = this.canvas.getCurrImgData();
+    this.canvas.runImg(null, function(i) {
+      if (imgData.gradMap[i] < 0) {
+        that.canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
+      } else if (imgData.gradMap[i] < 200) {
+        that.canvas.setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
+      } else if (imgData.gradMap[i] < 400) {
+        that.canvas.setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
+      } else if (imgData.gradMap[i] < 600) {
+        that.canvas.setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
+      } else if (imgData.gradMap[i] < 800) {
+        that.canvas.setPixel(i, {r: 0, g: 255, b: 255}, imgDataCopy);
+      } else {
+        that.canvas.setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
+      }
+    });
+    return imgDataCopy;
   };
 
   Canny.prototype.traverseEdge = function(current, imgData, threshold, traversed) {//traverses the current pixel until a length has been reached
@@ -206,6 +201,7 @@
     var that = this,
         traversed = [],
         edges = [];
+
     console.time('Get Edges Time');
     this.canvas.runImg(null, function(current) {
       if (imgData.data[current] === 255 && traversed[current] === undefined) {//assumes that an edge has white value
@@ -217,6 +213,7 @@
       }
     });
     console.timeEnd('Get Edges Time');
+
     return edges;
   };
 

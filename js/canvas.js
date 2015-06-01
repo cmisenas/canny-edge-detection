@@ -13,7 +13,7 @@
     }
     this.ctx = this.elem.getContext('2d');
     this.images = [];
-    this.currentImg = {};
+    this.origImg = {};
   }
 
   Canvas.prototype.loadImg = function(img, sx, sy) {
@@ -21,7 +21,7 @@
     var usrImg = new Image();
 
     this.images.push(img);
-    this.currentImg.index = this.images.indexOf(img);
+    this.origImg.index = this.images.indexOf(img);
 
     usrImg.onload = function() {
       if (usrImg.width !== that.width || usrImg.height !== that.height) {
@@ -31,7 +31,7 @@
         that.elem.height = that.height;
       }
       that.ctx.drawImage(usrImg, sx || 0, sy || 0);
-      that.currentImg.imgData = that.ctx.getImageData(0, 0, that.elem.width, that.elem.height);
+      that.origImg.imgData = that.ctx.getImageData(0, 0, that.width, that.height);
     };
     usrImg.src = img;
   };
@@ -59,10 +59,18 @@
     }
   };
 
-  Canvas.prototype.copyImageData = function(src) {
-    var dst = this.ctx.createImageData(src.width, src.height);
-    dst.data.set(src.data);
-    return dst;
+  Canvas.prototype.getOrigImgData = function() {
+    var orig = this.ctx.createImageData(this.width, this.height);
+    orig.data.set(this.origImg.imgData.data);
+    return orig;
+  };
+
+  Canvas.prototype.getCurrImgData = function() {
+    return this.ctx.getImageData(0, 0, this.width, this.height);
+  };
+
+  Canvas.prototype.setImgData = function(imgData) {
+    this.ctx.putImageData(imgData, 0, 0);
   };
 
   Canvas.prototype.setPixel = function(i, val, imgData) {
@@ -89,5 +97,4 @@
   }
 
   exports.Canvas = Canvas;
-
 }(this));

@@ -1,6 +1,6 @@
 ;(function(exports) {
-  var canvas = new Canvas('canvas');
-  var canny = new Canny(canvas),
+  var canvas = new Canvas('canvas'),
+      canny = new Canny(canvas),
       filters = new Filters(canvas);
 
   var grayBtn = document.getElementById('gray'),
@@ -18,7 +18,6 @@
     var imgFile;
     if (params !== '' && params.indexOf("img=") > -1) {
       imgFile = params.substring(params.indexOf("img=") + 4);
-      console.log(imgFile);
       canvas.loadImg('uploads/' + imgFile);
     }
   }
@@ -40,51 +39,46 @@
   };
 
   sobelBtn.onclick = function() {
-    var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
-    var result = canny.sobel(currentImgData);
-    canvas.ctx.putImageData(result, 0, 0);
+    var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height),
+        result = canny.sobel(currentImgData);
+    canvas.setImgData(result);
 
     nmsBtn.disabled = false;
 
     nmsBtn.onclick = function() {
-      var newImgData = canny.nonMaximumSuppress(result);
-      canvas.ctx.putImageData(newImgData, 0, 0);
-
+      var nmsImgData = canny.nonMaximumSuppress(result);
+      canvas.setImgData(nmsImgData);
       dirBtn.disabled = false;
       gradBtn.disabled = false;
       hysBtn.disabled = false;
-
-      newImgData.dirMap = result.dirMap;
-      newImgData.gradMap = result.gradMap;
-      var dirMap = canny.showDirMap(newImgData),
-          gradMap = canny.showGradMap(newImgData),
-          hysImgData = canny.hysteresis(newImgData);
+      nmsImgData.dirMap = result.dirMap;
+      nmsImgData.gradMap = result.gradMap;
 
       hysBtn.onclick = function() {
-        var newImgData = hysImgData();
-        canvas.ctx.putImageData(newImgData, 0, 0);
+        var newImgData = canny.hysteresis(nmsImgData);
+        canvas.setImgData(newImgData);
       };
 
       dirBtn.onclick = function() {
-        var newImgData = dirMap();
-        canvas.ctx.putImageData(newImgData, 0, 0);
+        var newImgData = canny.showDirMap(nmsImgData);
+        canvas.setImgData(newImgData);
       };
 
       gradBtn.onclick = function() {
-        var newImgData = gradMap();
-        canvas.ctx.putImageData(newImgData, 0, 0);
+        var newImgData = canny.showGradMap(nmsImgData);
+        canvas.setImgData(newImgData);
       };
     };
   };
 
   invertBtn.onclick = function() {
-    var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height);
-    var newImgData = filters.invertColors(currentImgData);
-    canvas.ctx.putImageData(newImgData, 0, 0);
+    var currentImgData = canvas.ctx.getImageData(0, 0, canvas.elem.width, canvas.elem.height),
+        newImgData = filters.invertColors(currentImgData);
+    canvas.setImgData(newImgData);
   };
 
   resetBtn.onclick = function() {
-    canvas.ctx.putImageData(canvas.currentImg.imgData, 0, 0);//put back the original image to the canvas
+    canvas.setImgData(canvas.origImg.imgData);//put back the original image to the canvas
   };
 
   checkForImg();
