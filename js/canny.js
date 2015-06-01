@@ -1,4 +1,11 @@
 ;(function(exports){
+  var SOBEL_X_FILTER = [[-1, 0, 1],
+                        [-2, 0, 2],
+                        [-1, 0, 1]];
+  var SOBEL_Y_FILTER = [[1, 2, 1],
+                        [0, 0, 0],
+                        [-1, -2, -1]];
+
   function Canny(canvElem) {
     this.canvas = canvElem;
   }
@@ -8,60 +15,27 @@
     var imgDataCopy = this.canvas.getCurrImgData(),
         dirMap = [],
         gradMap = [],
-        dir, grad,
         that = this;
-
-    //perform vertical convolution
-    var xfilter = [[-1, 0, 1],
-                   [-2, 0, 2],
-                   [-1, 0, 1]];
-    //perform horizontal convolution
-    var yfilter = [[1, 2, 1],
-                   [0, 0, 0],
-                   [-1, -2, -1]];
 
     console.time('Sobel Filter Time');
     this.canvas.runImg(3, function(current, neighbors) {
       var edgeX = 0;
       var edgeY = 0;
-      if (checkCornerOrBorder(current, imgDataCopy.width, imgDataCopy.height) === false) {
+      if (!isCornerOrBorder(current, imgDataCopy.width, imgDataCopy.height)) {
         for (var i = 0; i < 3; i++) {
           for (var j = 0; j < 3; j++) {
-            edgeX += imgData.data[neighbors[i][j]] * xfilter[i][j];
-            edgeY += imgData.data[neighbors[i][j]] * yfilter[i][j];
+            edgeX += imgData.data[neighbors[i][j]] * SOBEL_X_FILTER[i][j];
+            edgeY += imgData.data[neighbors[i][j]] * SOBEL_Y_FILTER[i][j];
           }
         }
       }
 
-      dir = roundDir(Math.atan2(edgeY, edgeX) * (180/Math.PI));
-      dirMap[current] = dir;
+      dirMap[current] = roundDir(Math.atan2(edgeY, edgeX) * (180/Math.PI));;
+      gradMap[current] = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
 
-      grad = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
-      gradMap[current] = grad;
-
-      that.canvas.setPixel(current, grad, imgDataCopy);
+      that.canvas.setPixel(current, gradMap[current], imgDataCopy);
     });
     console.timeEnd('Sobel Filter Time');
-
-    function checkCornerOrBorder(i, width, height) {
-      //returns true if a pixel lies on the border of an image
-      return i - (width * 4) < 0 || i % (width * 4) === 0 || i % (width * 4) === (width * 4) - 4  || i + (width * 4) > width * height * 4;
-    }
-
-    function roundDir(deg) {//rounds degrees to 4 possible orientations: horizontal, vertical, and 2 diagonals
-      deg = deg < 0 ? deg + 180 : deg;
-      var roundVal;
-      if ((deg >= 0 && deg <= 22.5) || (deg > 157.5 && deg <= 180)) {
-        roundVal = 0;
-      } else if (deg > 22.5 && deg <= 67.5) {
-        roundVal = 45;
-      } else if (deg > 67.5 && deg <= 112.5) {
-        roundVal = 90;
-      } else if (deg > 112.5 && deg <= 157.5) {
-        roundVal = 135;
-      }
-      return roundVal;
-    }
 
     imgDataCopy.dirMap = dirMap;
     imgDataCopy.gradMap = gradMap;
@@ -74,7 +48,7 @@
 
     console.time('NMS Time');
     this.canvas.runImg(3, function(current, neighbors) {
-      var pixNeighbors = getNeighbors(imgData.dirMap[current]);
+      var pixNeighbors = getPixelNeighbors(imgData.dirMap[current]);
 
       //pixel neighbors to compare
       var pix1 = imgData.gradMap[neighbors[pixNeighbors[0].x][pixNeighbors[0].y]];
@@ -87,11 +61,6 @@
       }
     });
     console.timeEnd('NMS Time');
-
-    function getNeighbors(dir) {
-      var degrees = {0 : [{x:1, y:2}, {x:1, y:0}], 45 : [{x: 0, y: 2}, {x: 2, y: 0}], 90 : [{x: 0, y: 1}, {x: 2, y: 1}], 135 : [{x: 0, y: 0}, {x: 2, y: 2}]};
-      return degrees[dir];
-    }
 
     return imgDataCopy;
   };
@@ -175,51 +144,11 @@
 
   Canny.prototype.traverseEdge = function(current, imgData, threshold, traversed) {//traverses the current pixel until a length has been reached
     var group = [current]; //initialize the group from the current pixel's perspective
-    var neighbors = this.getNeighborEdges(current, imgData, threshold, traversed);//pass the traversed group to the getNeighborEdges so that it will not include those anymore
+    var neighbors = getEdgeNeighbors(current, imgData, threshold, traversed);//pass the traversed group to the getEdgeNeighbors so that it will not include those anymore
     for(var i = 0; i < neighbors.length; i++){
       group = group.concat(this.traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));//recursively get the other edges connected
     }
     return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
-  };
-
-
-  Canny.prototype.getNeighborEdges = function(i, imgData, threshold, includedEdges) {
-    var neighbors = [];
-    var directions = [
-      i + 4, //e
-      i - imgData.width * 4 + 4, //ne
-      i - imgData.width * 4, //n
-      i - imgData.width * 4 - 4, //nw
-      i - 4, //w
-      i + imgData.width * 4 - 4, //sw
-      i + imgData.width * 4, //s
-      i + imgData.width * 4 + 4 //se
-    ];
-    for(var j = 0; j < directions.length; j++)
-      if(imgData.data[directions[j]] >= threshold && (includedEdges === undefined || includedEdges.indexOf(directions[j]) === -1))
-        neighbors.push(directions[j]);
-
-    return neighbors;
-  };
-
-  Canny.prototype.getAllEdges = function(imgData) {
-    var that = this,
-        traversed = [],
-        edges = [];
-
-    console.time('Get Edges Time');
-    this.canvas.runImg(null, function(current) {
-      if (imgData.data[current] === 255 && traversed[current] === undefined) {//assumes that an edge has white value
-        var group = that.traverseEdge(current, imgData, 255, []);
-        edges.push(group);
-        for(var i = 0; i < group.length; i++){
-          traversed[group[i]] = true;
-        }
-      }
-    });
-    console.timeEnd('Get Edges Time');
-
-    return edges;
   };
 
   exports.Canny = Canny;

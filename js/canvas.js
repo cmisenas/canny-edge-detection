@@ -1,6 +1,6 @@
 ;(function(exports) {
 
-  function Canvas(id, w, h, res) {
+  function Canvas(id, w, h) {
     this.elem = document.getElementById(id);
     this.width = w || 600;
     this.height = h || 400;
