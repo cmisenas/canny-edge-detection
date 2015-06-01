@@ -16,18 +16,6 @@
     this.currentImg = {};
   }
 
-  Canvas.prototype.resize = function(e) {
-    if (e.pageX === this.offsetLeft && e.pageY !== this.offsetTop) {
-      this.style.cursor = 'w-resize';
-    } else if (e.pageX !== this.offsetLeft && e.pageY === this.offsetTop) {
-      this.style.cursor = 'n-resize';
-    } else if (e.pageX === this.offsetLeft + this.width - 1 && e.pageY !== this.offsetTop + this.height - 1) {
-      this.style.cursor = 'e-resize';
-    } else if (e.pageX !== this.offsetLeft + this.width - 1 && e.pageY === this.offsetTop + this.height - 1) {
-      this.style.cursor = 's-resize';
-    }
-  };
-
   Canvas.prototype.loadImg = function(img, sx, sy) {
     var that = this;
     var usrImg = new Image();
