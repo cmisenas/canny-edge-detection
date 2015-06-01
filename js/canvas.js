@@ -87,9 +87,18 @@
     if (i < 0 || i > imgData.data.length - 4) {
       return {r: 255, g: 255, b: 255, a: 255};
     } else {
-      return {r: imgData.data[i], g: imgData.data[i + 1], b: imgData.data[i + 2], a: imgData.data[i + 3] };
+      return this.getRGBA(i, imgData);
     }
   };
+
+  Canvas.prototype.getRGBA = function(start, imgData) {
+    return {
+      r: imgData.data[start],
+      g: imgData.data[start+1],
+      b: imgData.data[start+2],
+      a: imgData.data[start+3]
+    }
+  }
 
   exports.Canvas = Canvas;
 
