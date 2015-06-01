@@ -132,16 +132,21 @@
     var that = this,
         imgDataCopy = this.canvas.getCurrImgData();
     this.canvas.runImg(null, function(i) {
-      if (imgData.dirMap[i] === 0) {
-        that.canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
-      } else if (imgData.dirMap[i] === 45) {
-        that.canvas.setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
-      } else if (imgData.dirMap[i] === 90) {
-        that.canvas.setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
-      } else if (imgData.dirMap[i] === 135) {
-        that.canvas.setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
-      } else {
-        that.canvas.setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
+      switch(imgData.dirMap[i]){
+        case 0:
+          that.canvas.setPixel(i, COLORS.RED, imgDataCopy);
+          break;
+        case 45:
+          that.canvas.setPixel(i, COLORS.GREEN, imgDataCopy);
+          break;
+        case 90:
+          that.canvas.setPixel(i, COLORS.BLUE, imgDataCopy);
+          break;
+        case 135:
+          that.canvas.setPixel(i, COLORS.YELLOW, imgDataCopy);
+          break;
+        default:
+          that.canvas.setPixel(i, COLORS.PINK, imgDataCopy);
       }
     });
     return imgDataCopy;
@@ -152,17 +157,17 @@
         imgDataCopy = this.canvas.getCurrImgData();
     this.canvas.runImg(null, function(i) {
       if (imgData.gradMap[i] < 0) {
-        that.canvas.setPixel(i, {r: 255, g: 0, b: 0}, imgDataCopy);
+        that.canvas.setPixel(i, COLORS.RED, imgDataCopy);
       } else if (imgData.gradMap[i] < 200) {
-        that.canvas.setPixel(i, {r: 0, g: 255, b: 0}, imgDataCopy);
+        that.canvas.setPixel(i, COLORS.GREEN, imgDataCopy);
       } else if (imgData.gradMap[i] < 400) {
-        that.canvas.setPixel(i, {r: 0, g: 0, b: 255}, imgDataCopy);
+        that.canvas.setPixel(i, COLORS.BLUE, imgDataCopy);
       } else if (imgData.gradMap[i] < 600) {
-        that.canvas.setPixel(i, {r: 255, g: 255, b: 0}, imgDataCopy);
+        that.canvas.setPixel(i, COLORS.YELLOW, imgDataCopy);
       } else if (imgData.gradMap[i] < 800) {
-        that.canvas.setPixel(i, {r: 0, g: 255, b: 255}, imgDataCopy);
+        that.canvas.setPixel(i, COLORS.AQUA, imgDataCopy);
       } else {
-        that.canvas.setPixel(i, {r: 255, g: 0, b: 255}, imgDataCopy);
+        that.canvas.setPixel(i, COLORS.PINK, imgDataCopy);
       }
     });
     return imgDataCopy;

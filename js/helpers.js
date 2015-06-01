@@ -11,4 +11,13 @@
     }
     return result;
   };
+
+  exports.COLORS = {
+    RED: {r: 255, g: 0, b: 0},
+    GREEN: {r: 0, g: 255, b: 0},
+    BLUE: {r: 0, g: 0, b: 255},
+    YELLOW: {r: 255, g: 255, b: 0},
+    PINK: {r: 255, g: 0, b: 255},
+    AQUA: {r: 0, g: 255, b: 255}
+  };
 }(this));
