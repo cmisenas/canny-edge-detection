@@ -12,16 +12,12 @@
       document.body.insertBefore(this.elem, document.body.firstChild);
     }
     this.ctx = this.elem.getContext('2d');
-    this.images = [];
     this.origImg = {};
   }
 
   Canvas.prototype.loadImg = function(img, sx, sy) {
     var that = this;
     var usrImg = new Image();
-
-    this.images.push(img);
-    this.origImg.index = this.images.indexOf(img);
 
     usrImg.onload = function() {
       if (usrImg.width !== that.width || usrImg.height !== that.height) {
