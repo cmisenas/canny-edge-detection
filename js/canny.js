@@ -71,7 +71,6 @@
   //mark strong and weak edges, discard others as false edges; only keep weak edges that are connected to strong edges
   Canny.prototype.hysteresis = function(){
     var that = this,
-        imgData = this.canvas.getCurrImgData(),
         imgDataCopy = this.canvas.getCurrImgData(),
         realEdges = [], //where real edges will be stored with the 1st pass
         t1 = 150, //high threshold value
@@ -80,8 +79,8 @@
     //first pass
     console.time('Hysteresis Time');
     this.canvas.runImg(null, function(current) {
-      if (imgData.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
-        var group = that._traverseEdge(current, imgData, t2, []);
+      if (imgDataCopy.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
+        var group = that._traverseEdge(current, imgDataCopy, t2, []);
         for(var i = 0; i < group.length; i++){
           realEdges[group[i]] = true;
         }
