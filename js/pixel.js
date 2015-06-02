@@ -1,12 +1,13 @@
 ;(function(exports) {
   var DIRECTIONS = ["n", "e", "s", "w", "ne", "nw", "se", "sw"];
 
-  function Pixel(i,w,h) {
+  function Pixel(i,w,h,cnvs) {
     var that = this;
     this.index = i;
     this.width = w;
     this.height = h;
     this.neighbors = [];
+    this.cnvs = cnvs;
 
     DIRECTIONS.map(function(d,idx){
       that.neighbors.push(that[d]());
@@ -62,19 +63,19 @@
   };
 
   Pixel.prototype.r = function(){
-    return this.cvs[this.index];
+    return this.cnvs[this.index];
   };
 
   Pixel.prototype.g = function(){
-    return this.cvs[this.index+1];
+    return this.cnvs[this.index+1];
   };;
 
   Pixel.prototype.b = function(){
-    return this.cvs[this.index+2];
+    return this.cnvs[this.index+2];
   };
 
   Pixel.prototype.a = function(){
-    return this.cvs[this.index+3];
+    return this.cnvs[this.index+3];
   };
 
   Pixel.prototype.isBorder = function(){
