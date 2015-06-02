@@ -19,9 +19,10 @@
 
     console.time('Sobel Filter Time');
     this.canvas.runImg(3, function(current, neighbors) {
-      var edgeX = 0;
-      var edgeY = 0;
-      if (!isCornerOrBorder(current, imgDataCopy.width, imgDataCopy.height)) {
+      var edgeX = edgeY = 0,
+          pixel = new Pixel(current, imgDataCopy.width, imgDataCopy.height);
+
+      if (!pixel.isBorder()) {
         for (var i = 0; i < 3; i++) {
           for (var j = 0; j < 3; j++) {
             edgeX += imgData.data[neighbors[i][j]] * SOBEL_X_FILTER[i][j];
