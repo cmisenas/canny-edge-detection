@@ -5,13 +5,40 @@
   var SOBEL_Y_FILTER = [[1, 2, 1],
                         [0, 0, 0],
                         [-1, -2, -1]];
+  var ROBERTS_X_FILTER = [[1, 0],
+                          [0, -1]];
+  var ROBERTS_Y_FILTER = [[0, 1],
+                          [-1, 0]];
+  var PREWITT_X_FILTER = [[-1, 0, 1],
+                          [-1, 0, 1],
+                          [-1, 0, 1]];
+  var PREWITT_Y_FILTER = [[-1, -1, -1],
+                          [0, 0, 0],
+                          [1, 1, 1]];
+
+  var OPERATORS = { "sobel": {
+                      x: SOBEL_X_FILTER,
+                      y: SOBEL_Y_FILTER,
+                      len: SOBEL_X_FILTER.length
+                    },
+                    "roberts": {
+                      x: ROBERTS_X_FILTER,
+                      y: ROBERTS_Y_FILTER,
+                      len: ROBERTS_Y_FILTER.length
+                    },
+                    "prewitt": {
+                      x: PREWITT_X_FILTER,
+                      y: PREWITT_Y_FILTER,
+                      len: PREWITT_Y_FILTER.length
+                    }
+                  }
 
   function Canny(canvElem) {
     this.canvas = canvElem;
   }
 
   //find intensity gradient of image
-  Canny.prototype.sobel = function() {
+  Canny.prototype.gradient = function(op) {
     var imgData = this.canvas.getCurrImgData(),
         imgDataCopy = this.canvas.getCurrImgData(),
         dirMap = [],
@@ -24,10 +51,10 @@
           pixel = new Pixel(current, imgDataCopy.width, imgDataCopy.height);
 
       if (!pixel.isBorder()) {
-        for (var i = 0; i < 3; i++) {
-          for (var j = 0; j < 3; j++) {
-            edgeX += imgData.data[neighbors[i][j]] * SOBEL_X_FILTER[i][j];
-            edgeY += imgData.data[neighbors[i][j]] * SOBEL_Y_FILTER[i][j];
+        for (var i = 0; i < OPERATORS[op].len; i++) {
+          for (var j = 0; j < OPERATORS[op].len; j++) {
+            edgeX += imgData.data[neighbors[i][j]] * OPERATORS[op]["x"][i][j];
+            edgeY += imgData.data[neighbors[i][j]] * OPERATORS[op]["y"][i][j];
           }
         }
       }

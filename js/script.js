@@ -5,11 +5,11 @@
 
   var grayBtn = document.getElementById('gray'),
       blurBtn = document.getElementById('blur'),
-      sobelBtn = document.getElementById('sobel'),
+      gradBtn = document.getElementById('gradient'),
       nmsBtn = document.getElementById('nms'),
       hysBtn = document.getElementById('hys'),
       dirBtn = document.getElementById('dirmap'),
-      gradBtn = document.getElementById('gradmap'),
+      intenBtn = document.getElementById('gradmap'),
       invertBtn = document.getElementById('invert'),
       resetBtn = document.getElementById('reset');
 
@@ -34,15 +34,16 @@
     canvas.setImgData(filters.gaussianBlur(sigma, size));
   };
 
-  sobelBtn.onclick = function() {
-    canvas.setImgData(canny.sobel());
+  gradBtn.onclick = function() {
+    var operator = document.querySelector('input[name=operator]:checked').value;
+    canvas.setImgData(canny.gradient(operator));
     nmsBtn.disabled = false;
   };
 
   nmsBtn.onclick = function() {
     canvas.setImgData(canny.nonMaximumSuppress());
     dirBtn.disabled = false;
-    gradBtn.disabled = false;
+    intenBtn.disabled = false;
     hysBtn.disabled = false;
   };
 
@@ -54,7 +55,7 @@
     canvas.setImgData(canny.showDirMap());
   };
 
-  gradBtn.onclick = function() {
+  intenBtn.onclick = function() {
     canvas.setImgData(canny.showGradMap());
   };
 
