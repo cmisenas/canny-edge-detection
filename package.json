@@ -1,6 +1,12 @@
 {
   "name": "canny-edge-detection-js",
   "version": "0.0.1",
-  "private": true
+  "private": true,
+  "scripts": {
+    "start": "node js/server.js"
+  },
+  "engines": {
+    "node": "0.12.2"
+  }
 }
 

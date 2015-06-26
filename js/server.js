@@ -142,7 +142,7 @@ var uploadFile = function(request, response, boundary) {
 };
 
 var startServer = function() {
-  var PORT = 8000;
+  var PORT = process.env.PORT || 8000;
   var app = http.createServer(function(request, response){
     var pathname = url.parse(request.url).pathname.substring(1);
     if (pathname === '') {
