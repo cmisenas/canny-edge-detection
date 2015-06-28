@@ -25,6 +25,7 @@ Access program on port 8000.
 
 ##TODO
 + [ ] Cleanup image uploading.
++ [ ] Fix non-maximum suppression thresholding (especially bad with Cross filter)
 + [x] Add other filters
 
 
