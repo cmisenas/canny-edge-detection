@@ -45,4 +45,49 @@
 
     return neighbors;
   };
+
+  exports.createHistogram = function(cvs) {
+    var histogram = { g: [] },
+        size = 256,
+        total = 0,
+        imgData = cvs.getCurrImgData();
+    while(size--) histogram.g[size] = 0;
+    cvs.runImg(null, function(i) {
+      histogram.g[imgData.data[i]]++;
+      total++;
+    });
+    histogram.length = total;
+    return histogram;
+  };
+
+  // mean threshold works better than median threshold
+  // however is sensitive to noise
+  // works best when Gaussian blur is applied first
+  exports.calcMeanThreshold = function(cvs) {
+    var histogram = exports.createHistogram(cvs),
+        sum = 0,
+        total = histogram.length;
+    histogram.g.forEach(function(e, i){ sum += (e*(i + 1)); });
+    return sum/total;
+  }
+
+  // does not work that well
+  // median value is almost always 0 (black)
+  // if background is bigger than foreground
+  exports.calcMedianThreshold = function(cvs) {
+    var histogram = createHistogram(cvs),
+        m = Math.round(histogram.length/2),
+        n = 0,
+        median;
+    histogram.g.some(function(e, i){
+      n += e;
+      if (n >= m) {
+        median = i;
+        return true;
+      } else {
+        return false;
+      }
+    });
+    return median;
+  }
 }(this));

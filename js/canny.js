@@ -100,8 +100,8 @@
     var that = this,
         imgDataCopy = this.canvas.getCurrImgData(),
         realEdges = [], //where real edges will be stored with the 1st pass
-        t1 = 150, //high threshold value
-        t2 = 100; //low threshold value
+        t1 = calcMeanThreshold(this.canvas), //high threshold value
+        t2 = t1/2; //low threshold value
 
     //first pass
     console.time('Hysteresis Time');

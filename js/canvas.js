@@ -44,6 +44,7 @@
     }
 
     function getMatrix(cx, cy, size) {//will generate a 2d array of sizexsize given center x, center y, size, image width & height
+      if (!size) { return; }
       var matrix = [];
       for (var i = 0, y = -(size-1)/2; i < size; i++, y++) {
         matrix[i] = [];
