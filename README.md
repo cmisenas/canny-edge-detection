@@ -15,7 +15,7 @@ Currently, there are 3 operators you may choose from:
 5. Remove weak/false edges.
 A process called hysteresis is used where there are two thresholds--high and low--to be compared to each pixel.
 
-##Usage
+## Usage
 You'll need [Node.js](http://nodejs.org/) installed.
 Go to root directory of the project and start by entering the following on your terminal:
 ```
@@ -23,13 +23,17 @@ node js/server.js
 ```
 Access program on port 8000.
 
-##TODO
+## TODO
 + [ ] Cleanup image uploading.
-+ [ ] Fix non-maximum suppression thresholding (especially bad with Cross filter)
++ [x] Fix non-maximum suppression thresholding (especially bad with Cross filter)
 + [x] Add other filters
 
 
-##License
+## Contributors
+* [@Tagussan](https://github.com/Tagussan): Otsu's method for thresholding.
+
+
+## License
 Distributed under the terms of the [GNU General Public License version 3](http://www.gnu.org/copyleft/gpl.html).
 
 ```

@@ -69,7 +69,7 @@
         total = histogram.length;
     histogram.g.forEach(function(e, i){ sum += (e*(i + 1)); });
     return sum/total;
-  }
+  };
 
   // does not work that well
   // median value is almost always 0 (black)
@@ -89,5 +89,50 @@
       }
     });
     return median;
-  }
+  };
+
+  exports.calcWeight = function(histogram, s, e) {
+    var total = histogram.reduce(function(i, j){ return i + j; }, 0);
+    var partHist = (s === e) ? [histogram[s]] : histogram.slice(s, e);
+    var part = partHist.reduce(function(i, j){ return i + j; }, 0);
+    return parseFloat(part, 10)/total;
+  };
+
+  exports.calcMean = function(histogram, s, e) {
+    var partHist = (s === e) ? [histogram[s]] : histogram.slice(s, e);
+    var val = total = 0;
+    partHist.forEach(function(el, i){
+      val += ((s + i) * el);
+      total += el;
+    });
+    return parseFloat(val, 10)/total;
+  };
+
+  exports.calcBetweenClassVariance = function(weight1, mean1, weight2, mean2) {
+    return weight1 * weight2 * (mean1 - mean2) * (mean1 - mean2);
+  };
+
+  exports.fastOtsu = function(canvas) {
+    var histogram = exports.createHistogram(canvas);
+    var start = 0;
+    var end = histogram.g.length - 1;
+    var leftWeight, rightWeight,
+        leftMean, rightMean;
+    var betweenClassVariances = [];
+    var max = -Infinity, threshold;
+
+    histogram.g.forEach(function(el, i) {
+      leftWeight = exports.calcWeight(histogram.g, start, i);
+      rightWeight = exports.calcWeight(histogram.g, i, end + 1);
+      leftMean = exports.calcMean(histogram.g, start, i);
+      rightMean = exports.calcMean(histogram.g, i, end + 1);
+      betweenClassVariances[i] = exports.calcBetweenClassVariance(leftWeight, leftMean, rightWeight, rightMean);
+      if (betweenClassVariances[i] > max) {
+        max = betweenClassVariances[i];
+        threshold = i;
+      }
+    });
+
+    return threshold;
+  };
 }(this));
