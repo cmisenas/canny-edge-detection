@@ -1,5 +1,5 @@
 ;(function(exports) {
-  var canvas = new Canvas('canvas'),
+  var canvas = new Cabbage('canvas'),
       canny = new Canny(canvas),
       filters = new Filters(canvas);
 
@@ -23,7 +23,7 @@
   }
 
   grayBtn.onclick = function() {
-    canvas.setImgData(filters.grayscale());
+    canvas.setImg(filters.grayscale());
   };
 
   blurBtn.onclick = function() {
@@ -31,40 +31,40 @@
         sigma = Number(document.getElementById('sigma').value);
     size = (size <= 1 || size > 21) ? 3 : (size % 2 === 0) ? size - 1 : size;
     sigma = (sigma < 1 || sigma > 10) ? 1.5 : sigma;
-    canvas.setImgData(filters.gaussianBlur(sigma, size));
+    canvas.setImg(filters.gaussianBlur(sigma, size));
   };
 
   gradBtn.onclick = function() {
     var operator = document.querySelector('input[name=operator]:checked').value;
-    canvas.setImgData(canny.gradient(operator));
+    canvas.setImg(canny.gradient(operator));
     nmsBtn.disabled = false;
   };
 
   nmsBtn.onclick = function() {
-    canvas.setImgData(canny.nonMaximumSuppress());
+    canvas.setImg(canny.nonMaximumSuppress());
     dirBtn.disabled = false;
     intenBtn.disabled = false;
     hysBtn.disabled = false;
   };
 
   hysBtn.onclick = function() {
-    canvas.setImgData(canny.hysteresis());
+    canvas.setImg(canny.hysteresis());
   };
 
   dirBtn.onclick = function() {
-    canvas.setImgData(canny.showDirMap());
+    canvas.setImg(canny.showDirMap());
   };
 
   intenBtn.onclick = function() {
-    canvas.setImgData(canny.showGradMap());
+    canvas.setImg(canny.showGradMap());
   };
 
   invertBtn.onclick = function() {
-    canvas.setImgData(filters.invertColors());
+    canvas.setImg(filters.invertColors());
   };
 
   resetBtn.onclick = function() {
-    canvas.setImgData(canvas.origImg.imgData);//put back the original image to the canvas
+    canvas.setImg(canvas.origImg.imgData);//put back the original image to the canvas
   };
 
   checkForImg();

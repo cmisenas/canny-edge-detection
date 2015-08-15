@@ -39,16 +39,17 @@
 
   //find intensity gradient of image
   Canny.prototype.gradient = function(op) {
-    var imgData = this.canvas.getCurrImgData(),
-        imgDataCopy = this.canvas.getCurrImgData(),
+    var imgData = this.canvas.getCurrentImg(),
+        imgDataCopy = this.canvas.getCurrentImg(),
         dirMap = [],
         gradMap = [],
         that = this;
 
     console.time('Sobel Filter Time');
-    this.canvas.runImg(3, function(current, neighbors) {
+    this.canvas.convolve(function(neighbors, x, y, pixelIndex, cvsIndex) {
       var edgeX = edgeY = 0,
-          pixel = new Pixel(current, imgDataCopy.width, imgDataCopy.height);
+          rgba = Array.prototype.slice.call(imgDataCopy.data, cvsIndex, cvsIndex + 4),
+          pixel = new Pixel(x, y, rgba);
 
       if (!pixel.isBorder()) {
         for (var i = 0; i < OPERATORS[op].len; i++) {
@@ -59,11 +60,11 @@
         }
       }
 
-      dirMap[current] = roundDir(Math.atan2(edgeY, edgeX) * (180/Math.PI));;
-      gradMap[current] = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
+      dirMap[cvsIndex] = roundDir(Math.atan2(edgeY, edgeX) * (180/Math.PI));
+      gradMap[cvsIndex] = Math.round(Math.sqrt(edgeX * edgeX + edgeY * edgeY));
 
-      that.canvas.setPixel(current, gradMap[current], imgDataCopy);
-    });
+      that.canvas.setPixel({x: x, y: y}, gradMap[cvsIndex]);
+    }, 3);
     console.timeEnd('Sobel Filter Time');
 
     this.canvas.dirMap = dirMap;
@@ -72,42 +73,43 @@
   };
 
   Canny.prototype.nonMaximumSuppress = function() {
-    var imgDataCopy = this.canvas.getCurrImgData(),
+    var imgDataCopy = this.canvas.getCurrentImg(),
         that = this;
 
     console.time('NMS Time');
-    this.canvas.runImg(3, function(current, neighbors) {
-      var pixNeighbors = getPixelNeighbors(that.canvas.dirMap[current]);
+    this.canvas.convolve(function(neighbors, x, y, pixelIndex, cvsIndex) {
+      var pixNeighbors = getPixelNeighbors(that.canvas.dirMap[cvsIndex]);
 
       //pixel neighbors to compare
       var pix1 = that.canvas.gradMap[neighbors[pixNeighbors[0].x][pixNeighbors[0].y]];
       var pix2 = that.canvas.gradMap[neighbors[pixNeighbors[1].x][pixNeighbors[1].y]];
 
-      if (pix1 > that.canvas.gradMap[current] ||
-          pix2 > that.canvas.gradMap[current] ||
-          (pix2 === that.canvas.gradMap[current] &&
-          pix1 < that.canvas.gradMap[current])) {
-        that.canvas.setPixel(current, 0, imgDataCopy);
+      if (pix1 > that.canvas.gradMap[cvsIndex] ||
+          pix2 > that.canvas.gradMap[cvsIndex] ||
+          (pix2 === that.canvas.gradMap[cvsIndex] &&
+          pix1 < that.canvas.gradMap[cvsIndex])) {
+        that.canvas.setPixel(cvsIndex, 0);
       }
-    });
+    }, 3);
     console.timeEnd('NMS Time');
 
     return imgDataCopy;
   };
 
+  // TODO: Do not use sparse array for storing real edges
   //mark strong and weak edges, discard others as false edges; only keep weak edges that are connected to strong edges
   Canny.prototype.hysteresis = function(){
     var that = this,
-        imgDataCopy = this.canvas.getCurrImgData(),
+        imgDataCopy = this.canvas.getCurrentImg(),
         realEdges = [], //where real edges will be stored with the 1st pass
         t1 = fastOtsu(this.canvas), //high threshold value
         t2 = t1/2; //low threshold value
 
     //first pass
     console.time('Hysteresis Time');
-    this.canvas.runImg(null, function(current) {
-      if (imgDataCopy.data[current] > t1 && realEdges[current] === undefined) {//accept as a definite edge
-        var group = that._traverseEdge(current, imgDataCopy, t2, []);
+    this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
+      if (imgDataCopy.data[cvsIndex] > t1 && realEdges[cvsIndex] === undefined) {//accept as a definite edge
+        var group = that._traverseEdge(cvsIndex, imgDataCopy, t2, []);
         for(var i = 0; i < group.length; i++){
           realEdges[group[i]] = true;
         }
@@ -115,11 +117,11 @@
     });
 
     //second pass
-    this.canvas.runImg(null, function(current) {
-      if (realEdges[current] === undefined) {
-        that.canvas.setPixel(current, 0, imgDataCopy);
+    this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
+      if (realEdges[cvsIndex] === undefined) {
+        that.canvas.setPixel({x: x, y: y}, 0);
       } else {
-        that.canvas.setPixel(current, 255, imgDataCopy);
+        that.canvas.setPixel({x: x, y: y}, 255);
       }
     });
     console.timeEnd('Hysteresis Time');
@@ -127,58 +129,67 @@
     return imgDataCopy;
   };
 
-  Canny.prototype.showDirMap = function() {//just a quick function to look at the direction results
+  //just a quick function to look at the direction results
+  Canny.prototype.showDirMap = function() {
     var that = this,
-        imgDataCopy = this.canvas.getCurrImgData();
-    this.canvas.runImg(null, function(i) {
-      switch(that.canvas.dirMap[i]){
+        imgDataCopy = this.canvas.getCurrentImg();
+    this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
+      switch(that.canvas.dirMap[cvsIndex]){
         case 0:
-          that.canvas.setPixel(i, COLORS.RED, imgDataCopy);
+          that.canvas.setPixel({x: x, y: y}, COLORS.RED);
           break;
         case 45:
-          that.canvas.setPixel(i, COLORS.GREEN, imgDataCopy);
+          that.canvas.setPixel({x: x, y: y}, COLORS.GREEN);
           break;
         case 90:
-          that.canvas.setPixel(i, COLORS.BLUE, imgDataCopy);
+          that.canvas.setPixel({x: x, y: y}, COLORS.BLUE);
           break;
         case 135:
-          that.canvas.setPixel(i, COLORS.YELLOW, imgDataCopy);
+          that.canvas.setPixel({x: x, y: y}, COLORS.YELLOW);
           break;
         default:
-          that.canvas.setPixel(i, COLORS.PINK, imgDataCopy);
+          that.canvas.setPixel({x: x, y: y}, COLORS.PINK);
       }
     });
     return imgDataCopy;
   };
 
+  // TODO: Evaluate function use/fulness
   Canny.prototype.showGradMap = function() {
     var that = this,
-        imgDataCopy = this.canvas.getCurrImgData();
-    this.canvas.runImg(null, function(i) {
-      if (that.canvas.gradMap[i] < 0) {
-        that.canvas.setPixel(i, COLORS.RED, imgDataCopy);
-      } else if (that.canvas.gradMap[i] < 200) {
-        that.canvas.setPixel(i, COLORS.GREEN, imgDataCopy);
-      } else if (that.canvas.gradMap[i] < 400) {
-        that.canvas.setPixel(i, COLORS.BLUE, imgDataCopy);
-      } else if (that.canvas.gradMap[i] < 600) {
-        that.canvas.setPixel(i, COLORS.YELLOW, imgDataCopy);
+        imgDataCopy = this.canvas.getCurrentImg();
+    this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
+      if (that.canvas.gradMap[cvsIndex] < 0) {
+        that.canvas.setPixel(cvsIndex, COLORS.RED);
+      } else if (that.canvas.gradMap[cvsIndex] < 200) {
+        that.canvas.setPixel(cvsIndex, COLORS.GREEN);
+      } else if (that.canvas.gradMap[cvsIndex] < 400) {
+        that.canvas.setPixel(cvsIndex, COLORS.BLUE);
+      } else if (that.canvas.gradMap[cvsIndex] < 600) {
+        that.canvas.setPixel(cvsIndex, COLORS.YELLOW);
       } else if (that.canvas.gradMap[i] < 800) {
-        that.canvas.setPixel(i, COLORS.AQUA, imgDataCopy);
+        that.canvas.setPixel(cvsIndex, COLORS.AQUA);
       } else {
-        that.canvas.setPixel(i, COLORS.PINK, imgDataCopy);
+        that.canvas.setPixel(cvsIndex, COLORS.PINK);
       }
     });
     return imgDataCopy;
   };
 
-  Canny.prototype._traverseEdge = function(current, imgData, threshold, traversed) {//traverses the current pixel until a length has been reached
-    var group = [current]; //initialize the group from the current pixel's perspective
-    var neighbors = getEdgeNeighbors(current, imgData, threshold, traversed);//pass the traversed group to the getEdgeNeighbors so that it will not include those anymore
+  // TODO: Optimize prime!
+  //traverses the current pixel until a length has been reached
+  Canny.prototype._traverseEdge = function(current, imgData, threshold, traversed) {
+    //initialize the group from the current pixel's perspective
+    var group = [current];
+    //pass the traversed group to the getEdgeNeighbors so that it will not include those anymore
+    var neighbors = getEdgeNeighbors(current, imgData, threshold, traversed);
     for(var i = 0; i < neighbors.length; i++){
-      group = group.concat(this._traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));//recursively get the other edges connected
+      //recursively get the other edges connected
+      group = group.concat(this._traverseEdge(neighbors[i], imgData, threshold, traversed.concat(group)));
     }
-    return group; //if the pixel group is not above max length, it will return the pixels included in that small pixel group
+    return group;
+    //if the pixel group is not above max length,
+    //it will return the pixels included in that small pixel group
   };
 
   exports.Canny = Canny;

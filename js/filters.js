@@ -28,14 +28,13 @@
   };
 
   Filters.prototype.grayscale = function() {
-    var imgDataCopy = this.canvas.getCurrImgData(),
-        that = this,
+    var that = this,
         grayLevel;
 
     console.time('Grayscale Time');
-    this.canvas.runImg(null, function(current) {
-      grayLevel = calculateGray(that.canvas.getPixel(current, imgDataCopy));
-      that.canvas.setPixel(current, grayLevel, imgDataCopy);
+    this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
+      grayLevel = calculateGray(that.canvas.getPixel(cvsIndex));
+      that.canvas.setPixel({x: x, y: y}, grayLevel);
     });
     console.timeEnd('Grayscale Time');
 
@@ -43,38 +42,38 @@
   };
 
   Filters.prototype.gaussianBlur = function(sigma, size) {
-    var imgDataCopy = this.canvas.getCurrImgData(),
+    var imgDataCopy = this.canvas.getCurrentImg(),
         that = this,
         kernel = generateKernel(sigma, size);
 
     console.time('Blur Time');
-    this.canvas.runImg(size, function(current, neighbors) {
+    this.canvas.convolve(function(neighbors, x, y, pixelIndex, cvsIndex) {
       var resultR = resultG = resultB = 0,
           pixel;
       for (var i = 0; i < size; i++) {
         for (var j = 0; j < size; j++) {
-          pixel = that.canvas.getPixel(neighbors[i][j], imgDataCopy);
+          pixel = that.canvas.getPixel(neighbors[i][j]);
           resultR += pixel.r * kernel[i][j];//return the existing pixel value multiplied by the kernel
           resultG += pixel.g * kernel[i][j];
           resultB += pixel.b * kernel[i][j];
         }
       }
-      that.canvas.setPixel(current, {r: resultR, g: resultG, b: resultB}, imgDataCopy);
-    });
+      that.canvas.setPixel(cvsIndex, {r: resultR, g: resultG, b: resultB});
+    }, size);
     console.timeEnd('Blur Time');
 
     return imgDataCopy;
   };
 
   Filters.prototype.invertColors = function() {
-    var imgDataCopy = this.canvas.getCurrImgData(),
+    var imgDataCopy = this.canvas.getCurrentImg(),
         that = this,
         pixel;
 
     console.time('Invert Colors Time');
-    this.canvas.runImg(null, function(current) {
-      pixel = that.canvas.getPixel(current, imgDataCopy);
-      that.canvas.setPixel(current, {r: 255 - pixel.r, g: 255 - pixel.g, b: 255 - pixel.b}, imgDataCopy);
+    this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
+      pixel = that.canvas.getPixel(cvsIndex);
+      that.canvas.setPixel({x: x, y: y}, {r: 255 - pixel.r, g: 255 - pixel.g, b: 255 - pixel.b});
     });
     console.timeEnd('Invert Colors Time');
 

@@ -50,10 +50,10 @@
     var histogram = { g: [] },
         size = 256,
         total = 0,
-        imgData = cvs.getCurrImgData();
+        imgData = cvs.getCurrentImg();
     while(size--) histogram.g[size] = 0;
-    cvs.runImg(null, function(i) {
-      histogram.g[imgData.data[i]]++;
+    cvs.map(function(x, y, pixelIndex, cvsIndex) {
+      histogram.g[imgData.data[cvsIndex]]++;
       total++;
     });
     histogram.length = total;
