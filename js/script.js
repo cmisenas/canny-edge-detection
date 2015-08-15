@@ -23,7 +23,7 @@
   }
 
   grayBtn.onclick = function() {
-    canvas.setImg(filters.grayscale());
+    filters.grayscale();
   };
 
   blurBtn.onclick = function() {
@@ -31,7 +31,7 @@
         sigma = Number(document.getElementById('sigma').value);
     size = (size <= 1 || size > 21) ? 3 : (size % 2 === 0) ? size - 1 : size;
     sigma = (sigma < 1 || sigma > 10) ? 1.5 : sigma;
-    canvas.setImg(filters.gaussianBlur(sigma, size));
+    filters.gaussianBlur(sigma, size);
   };
 
   gradBtn.onclick = function() {
@@ -60,7 +60,7 @@
   };
 
   invertBtn.onclick = function() {
-    canvas.setImg(filters.invertColors());
+    filters.invertColors();
   };
 
   resetBtn.onclick = function() {

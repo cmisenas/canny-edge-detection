@@ -36,38 +36,41 @@
       grayLevel = calculateGray(that.canvas.getPixel(cvsIndex));
       that.canvas.setPixel({x: x, y: y}, grayLevel);
     });
+    this.canvas.setImg();
     console.timeEnd('Grayscale Time');
-
-    return imgDataCopy;
   };
 
   Filters.prototype.gaussianBlur = function(sigma, size) {
-    var imgDataCopy = this.canvas.getCurrentImg(),
-        that = this,
+    var that = this,
         kernel = generateKernel(sigma, size);
 
     console.time('Blur Time');
     this.canvas.convolve(function(neighbors, x, y, pixelIndex, cvsIndex) {
-      var resultR = resultG = resultB = 0,
-          pixel;
-      for (var i = 0; i < size; i++) {
-        for (var j = 0; j < size; j++) {
-          pixel = that.canvas.getPixel(neighbors[i][j]);
-          resultR += pixel.r * kernel[i][j];//return the existing pixel value multiplied by the kernel
-          resultG += pixel.g * kernel[i][j];
-          resultB += pixel.b * kernel[i][j];
+      // ignore edges
+      // TODO: make this faster!
+      if (x !== 0 && y !== 0 &&
+          x !== that.canvas.width - 1 &&
+          y !== that.canvas.height - 1) {
+        var resultR = resultG = resultB = 0,
+            pixel;
+        for (var i = 0; i < size; i++) {
+          for (var j = 0; j < size; j++) {
+            pixel = that.canvas.getPixel(neighbors[i][j]);
+            //return the existing pixel value multiplied by the kernel
+            resultR += pixel.r * kernel[i][j];
+            resultG += pixel.g * kernel[i][j];
+            resultB += pixel.b * kernel[i][j];
+          }
         }
+        that.canvas.setPixel({x: x, y: y}, {r: resultR, g: resultG, b: resultB});
       }
-      that.canvas.setPixel(cvsIndex, {r: resultR, g: resultG, b: resultB});
     }, size);
+    this.canvas.setImg();
     console.timeEnd('Blur Time');
-
-    return imgDataCopy;
   };
 
   Filters.prototype.invertColors = function() {
-    var imgDataCopy = this.canvas.getCurrentImg(),
-        that = this,
+    var that = this,
         pixel;
 
     console.time('Invert Colors Time');
@@ -75,9 +78,8 @@
       pixel = that.canvas.getPixel(cvsIndex);
       that.canvas.setPixel({x: x, y: y}, {r: 255 - pixel.r, g: 255 - pixel.g, b: 255 - pixel.b});
     });
+    this.canvas.setImg();
     console.timeEnd('Invert Colors Time');
-
-    return imgDataCopy;
   };
 
   exports.Filters = Filters;
