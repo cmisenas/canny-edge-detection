@@ -36,27 +36,27 @@
 
   gradBtn.onclick = function() {
     var operator = document.querySelector('input[name=operator]:checked').value;
-    canvas.setImg(canny.gradient(operator));
+    canny.gradient(operator);
     nmsBtn.disabled = false;
   };
 
   nmsBtn.onclick = function() {
-    canvas.setImg(canny.nonMaximumSuppress());
+    canny.nonMaximumSuppress();
     dirBtn.disabled = false;
     intenBtn.disabled = false;
     hysBtn.disabled = false;
   };
 
   hysBtn.onclick = function() {
-    canvas.setImg(canny.hysteresis());
+    canny.hysteresis();
   };
 
   dirBtn.onclick = function() {
-    canvas.setImg(canny.showDirMap());
+    canny.showDirMap();
   };
 
   intenBtn.onclick = function() {
-    canvas.setImg(canny.showGradMap());
+    canny.showGradMap();
   };
 
   invertBtn.onclick = function() {
@@ -64,7 +64,8 @@
   };
 
   resetBtn.onclick = function() {
-    canvas.setImg(canvas.origImg.imgData);//put back the original image to the canvas
+    //put back the original image to the canvas
+    canvas.putImageData(canvas.origImg);
   };
 
   checkForImg();

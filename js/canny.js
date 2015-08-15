@@ -39,23 +39,21 @@
 
   //find intensity gradient of image
   Canny.prototype.gradient = function(op) {
-    var imgData = this.canvas.getCurrentImg(),
-        imgDataCopy = this.canvas.getCurrentImg(),
+    var imgDataCopy = this.canvas.getCurrentImg(),
         dirMap = [],
         gradMap = [],
         that = this;
 
     console.time('Sobel Filter Time');
     this.canvas.convolve(function(neighbors, x, y, pixelIndex, cvsIndex) {
-      var edgeX = edgeY = 0,
-          rgba = Array.prototype.slice.call(imgDataCopy.data, cvsIndex, cvsIndex + 4),
-          pixel = new Pixel(x, y, rgba);
+      var edgeX = edgeY = 0;
 
-      if (!pixel.isBorder()) {
+      if (!that.canvas.isBorder({x: x, y: y})) {
         for (var i = 0; i < OPERATORS[op].len; i++) {
           for (var j = 0; j < OPERATORS[op].len; j++) {
-            edgeX += imgData.data[neighbors[i][j]] * OPERATORS[op]["x"][i][j];
-            edgeY += imgData.data[neighbors[i][j]] * OPERATORS[op]["y"][i][j];
+            if (!neighbors[i][j]) continue;
+            edgeX += imgDataCopy.data[neighbors[i][j]] * OPERATORS[op]["x"][i][j];
+            edgeY += imgDataCopy.data[neighbors[i][j]] * OPERATORS[op]["y"][i][j];
           }
         }
       }
@@ -65,16 +63,15 @@
 
       that.canvas.setPixel({x: x, y: y}, gradMap[cvsIndex]);
     }, 3);
+    this.canvas.setImg();
     console.timeEnd('Sobel Filter Time');
 
     this.canvas.dirMap = dirMap;
     this.canvas.gradMap = gradMap;
-    return imgDataCopy;
   };
 
   Canny.prototype.nonMaximumSuppress = function() {
-    var imgDataCopy = this.canvas.getCurrentImg(),
-        that = this;
+    var that = this;
 
     console.time('NMS Time');
     this.canvas.convolve(function(neighbors, x, y, pixelIndex, cvsIndex) {
@@ -88,12 +85,11 @@
           pix2 > that.canvas.gradMap[cvsIndex] ||
           (pix2 === that.canvas.gradMap[cvsIndex] &&
           pix1 < that.canvas.gradMap[cvsIndex])) {
-        that.canvas.setPixel(cvsIndex, 0);
+        that.canvas.setPixel({x: x, y: y}, 0);
       }
     }, 3);
+    this.canvas.setImg();
     console.timeEnd('NMS Time');
-
-    return imgDataCopy;
   };
 
   // TODO: Do not use sparse array for storing real edges
@@ -124,15 +120,14 @@
         that.canvas.setPixel({x: x, y: y}, 255);
       }
     });
-    console.timeEnd('Hysteresis Time');
 
-    return imgDataCopy;
+    this.canvas.setImg();
+    console.timeEnd('Hysteresis Time');
   };
 
   //just a quick function to look at the direction results
   Canny.prototype.showDirMap = function() {
-    var that = this,
-        imgDataCopy = this.canvas.getCurrentImg();
+    var that = this;
     this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
       switch(that.canvas.dirMap[cvsIndex]){
         case 0:
@@ -151,13 +146,12 @@
           that.canvas.setPixel({x: x, y: y}, COLORS.PINK);
       }
     });
-    return imgDataCopy;
+    this.canvas.setImg();
   };
 
   // TODO: Evaluate function use/fulness
   Canny.prototype.showGradMap = function() {
-    var that = this,
-        imgDataCopy = this.canvas.getCurrentImg();
+    var that = this;
     this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
       if (that.canvas.gradMap[cvsIndex] < 0) {
         that.canvas.setPixel(cvsIndex, COLORS.RED);
@@ -173,7 +167,7 @@
         that.canvas.setPixel(cvsIndex, COLORS.PINK);
       }
     });
-    return imgDataCopy;
+    this.canvas.setImg();
   };
 
   // TODO: Optimize prime!
