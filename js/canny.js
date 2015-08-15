@@ -154,17 +154,17 @@
     var that = this;
     this.canvas.map(function(x, y, pixelIndex, cvsIndex) {
       if (that.canvas.gradMap[cvsIndex] < 0) {
-        that.canvas.setPixel(cvsIndex, COLORS.RED);
+        that.canvas.setPixel({x: x, y: y}, COLORS.RED);
       } else if (that.canvas.gradMap[cvsIndex] < 200) {
-        that.canvas.setPixel(cvsIndex, COLORS.GREEN);
+        that.canvas.setPixel({x: x, y: y}, COLORS.GREEN);
       } else if (that.canvas.gradMap[cvsIndex] < 400) {
-        that.canvas.setPixel(cvsIndex, COLORS.BLUE);
+        that.canvas.setPixel({x: x, y: y}, COLORS.BLUE);
       } else if (that.canvas.gradMap[cvsIndex] < 600) {
-        that.canvas.setPixel(cvsIndex, COLORS.YELLOW);
-      } else if (that.canvas.gradMap[i] < 800) {
-        that.canvas.setPixel(cvsIndex, COLORS.AQUA);
+        that.canvas.setPixel({x: x, y: y}, COLORS.YELLOW);
+      } else if (that.canvas.gradMap[cvsIndex] < 800) {
+        that.canvas.setPixel({x: x, y: y}, COLORS.AQUA);
       } else {
-        that.canvas.setPixel(cvsIndex, COLORS.PINK);
+        that.canvas.setPixel({x: x, y: y}, COLORS.PINK);
       }
     });
     this.canvas.setImg();
