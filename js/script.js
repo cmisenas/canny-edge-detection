@@ -64,8 +64,7 @@
   };
 
   resetBtn.onclick = function() {
-    //put back the original image to the canvas
-    canvas.putImageData(canvas.origImg);
+    canvas.resetImageData();
   };
 
   checkForImg();
