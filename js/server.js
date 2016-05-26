@@ -75,7 +75,7 @@ var formHeaders = function(headerArr) {
         }
       }
     } else {
-      headers[field.toLowerCase()] = currentField[0];
+      headers[field.toLowerCase()] = currentLine[0];
     }
   }
   return headers
